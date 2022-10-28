@@ -20,7 +20,8 @@ class ModelPrediction(Resource):
     @api.response(400, "Invalid input")
     @api.response(404, "Model does not exist")
     def post(self, model_id: int) -> Dict[str, Any]:
-        """Predicts the success of a student using a given model"""
+        """Predicts the success of an applicant using a given model"""
         if model_id <= 0:
             api.abort(400, "Invalid model ID")
+        # TODO (kyungmin): Implement the endpoint
         return {"model_id": model_id, "success": False}

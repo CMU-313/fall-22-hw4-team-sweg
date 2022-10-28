@@ -12,7 +12,7 @@ class PredictionResult:
         min=1,
     )
     success: fields.Boolean = fields.Boolean(
-        title="Predicted Success",
-        description="The success of the given student predicted by the model",
+        title="Predicted success",
+        description="The success of the given applicant predicted by the model",
         required=True,
     )
