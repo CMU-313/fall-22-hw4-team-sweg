@@ -5,7 +5,7 @@ from flask_restx import Namespace, Resource
 
 from app.dtos import Applicant, PredictionResult
 
-api = Namespace("models", description="Models API")
+api = Namespace(name="models", description="Models API")
 applicant = api.model(name="Applicant", model=asdict(Applicant()))
 prediction_result = api.model(name="PredictionResult", model=asdict(PredictionResult()))
 
