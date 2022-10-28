@@ -1,16 +1,12 @@
-name: SWEg CI/CD
+name: SWEg CI
 on:
-  push:
-    branches:
-      - "main"
-    tags: [v*]
   pull_request:
     branches:
       - "main"
     tags: [v*]
 
 jobs:
-  test:
+  format_and_test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
