@@ -92,7 +92,8 @@ class Applicant:
     )
     activities: fields.Boolean = fields.Boolean(
         title="Activities",
-        description="Participated in extra-curricular activities (true - yes, false - no)")
+        description=
+        "Participated in extra-curricular activities (true - yes, false - no)")
     nursery: fields.Boolean = fields.Boolean(
         title="Nursery",
         description="Attended nursery school (true - yes, false - no)")
@@ -113,7 +114,10 @@ class Applicant:
     free_time: fields.Integer = fields.Integer(
         title="Free time", description="Free time after school", min=1, max=5)
     going_out: fields.Integer = fields.Integer(
-        title="Going out amount", description="Going out with friends", min=1, max=5)
+        title="Going out amount",
+        description="Going out with friends",
+        min=1,
+        max=5)
     workday_alcohol: fields.Integer = fields.Integer(
         title="Alcohol (workday)",
         description="Workday alcohol consumption",
