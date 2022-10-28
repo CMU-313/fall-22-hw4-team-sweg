@@ -7,12 +7,14 @@ from app.dtos import Applicant, PredictionResult
 
 api = Namespace(name="models", description="Models API")
 applicant = api.model(name="Applicant", model=asdict(Applicant()))
-prediction_result = api.model(name="PredictionResult", model=asdict(PredictionResult()))
+prediction_result = api.model(name="PredictionResult",
+                              model=asdict(PredictionResult()))
 
 
 @api.route("/<int:model_id>/predict")
 @api.param("model_id", description="The model ID")
 class ModelPrediction(Resource):
+
     @api.expect(applicant)
     @api.marshal_with(prediction_result, code=200)
     @api.response(400, "Invalid input")
