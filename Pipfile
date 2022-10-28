@@ -5,12 +5,13 @@ name = "pypi"
 
 [packages]
 importlib_metadata = "*"
-flask = "*"
-jupyter = "*"
+flask-restx = "*"
 joblib = "*"
+jupyter = "*"
 numpy = "*"
 pandas = "*"
 sklearn = "*"
+werkzeug = "==2.1.2"
 
 [dev-packages]
 pytest = "*"
