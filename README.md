@@ -93,6 +93,8 @@ You can alter the port number that is used by the Flask server by changing the f
 FLASK_RUN_PORT=8000
 ```
 
+After filling up decorators for each endpoint, Swagger API documentation is automatically generated and available from the `/api/docs` URL of the server. For decorator rules and examples, refer to [Flask-RESTX Swagger documentation](https://flask-restx.readthedocs.io/en/latest/swagger.html#swagger-documentation).
+
 ## Testing
 
 To run tests, execute the following command from the `app` directory:
