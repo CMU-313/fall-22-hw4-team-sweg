@@ -4,18 +4,17 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pandas = "*"
-numpy = "*"
-sklearn = "*"
+importlib_metadata = "*"
+flask-restx = "*"
 joblib = "*"
-flask = "*"
-pytest = "*"
+jupyter = "*"
+numpy = "*"
+pandas = "*"
+sklearn = "*"
+werkzeug = "==2.1.2"
 
 [dev-packages]
-pandas = "*"
-numpy = "*"
-sklearn = "*"
-joblib = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.8"

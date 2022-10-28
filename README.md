@@ -31,7 +31,7 @@ The same instructions for Mac OS **should** work for windows, but if it doesn't,
 #### Downloading Packages
 
 The repository contains `Pipfile` that declares which packages are necessary to run the `model_build.ipnyb`.
-To install packages declared by the Pipfile, run `pipenv install` in the command line from the root directory.
+To install packages declared by the Pipfile, run `pipenv install -d` in the command line from the root directory.
 
 You might want to use additional packages throughout the assignment.
 To do so, run `pipenv install [PACKAGE_NAME]`, as you would install python packages using pip.
