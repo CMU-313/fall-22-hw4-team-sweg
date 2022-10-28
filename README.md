@@ -10,7 +10,7 @@ Please consult the [homework assignment](https://cmu-313.github.io//assignments/
 
 #### Prereqs
 
-- The version of Python you and your team will be using (version greater than 3.8)
+- Python 3.8
 - pip package manager is updated to latest version
 - For additional resources, check out [this link](https://pipenv-fork.readthedocs.io/en/latest/install.html#installing-pipenv)
 
@@ -31,7 +31,7 @@ The same instructions for Mac OS **should** work for windows, but if it doesn't,
 #### Downloading Packages
 
 The repository contains `Pipfile` that declares which packages are necessary to run the `model_build.ipnyb`.
-To install packages declared by the Pipfile, run `pipenv install -d` in the command line from the root directory.
+To install packages declared by the Pipfile, run `pipenv install --dev` in the command line from the root directory.
 
 You might want to use additional packages throughout the assignment.
 To do so, run `pipenv install [PACKAGE_NAME]`, as you would install python packages using pip.
@@ -84,10 +84,10 @@ Or if you're in the pipenv shell, run:
 flask run
 ```
 
-You can alter the port number that is used by the Flask server by changing the following line in `app/app.py`:
+You can alter the port number that is used by the Flask server by changing the following line in `app/.flaskenv`:
 
-```python
-app.run(host="0.0.0.0", debug=True, port=80)
+```sh
+FLASK_RUN_PORT=8000
 ```
 
 ## Testing

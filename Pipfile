@@ -10,6 +10,7 @@ joblib = "*"
 jupyter = "*"
 numpy = "*"
 pandas = "*"
+python-dotenv = "*"
 sklearn = "*"
 werkzeug = "==2.1.2"
 
