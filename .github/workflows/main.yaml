@@ -2,11 +2,11 @@ name: SWEg CI/CD
 on:
   push:
     branches:
-      - 'main'
+      - "main"
     tags: [v*]
   pull_request:
     branches:
-      - 'main'
+      - "main"
     tags: [v*]
 
 jobs:
@@ -37,9 +37,27 @@ jobs:
         run: |
           cd app
       - name: Run isort
-        uses: isort/isort-action@master    
-      - name: Run black
-        uses: psf/black@stable
+        uses: isort/isort-action@master
+        with:
+          configuration: .
+      - name: Run yapf
+        id: autoyapf
+        uses: mritunjaysharma394/autoyapf@v2
+        with:
+          args: --style pep8 --recursive --in-place .
+      - name: Check for modified files
+        id: git-check
+        run: echo ::set-output name=modified::$(if git diff-index --quiet HEAD --; then echo "false"; else echo "true"; fi)
+      - name: Push changes
+        if: steps.git-check.outputs.modified == 'true'
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com' 
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git config pull.rebase true
+          git commit -am "Automated format fixes"
+          git pull origin ${{ github.head_ref }}
+          git push origin HEAD:${{ github.head_ref }}
       - name: Run test suite
         run: |
           pipenv run pytest
