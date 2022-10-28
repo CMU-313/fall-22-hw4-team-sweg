@@ -62,24 +62,27 @@ pipenv run jupyter notebook
 You should also use pipenv to run your Flask API server.
 To do so, execute the following commands from the `app` directory in the pip venv shell.
 
-
 Set an environment variable for FLASK_APP.
 For Mac and Linux:
+
 ```terminal
 export FLASK_APP=app.py
 ```
 
 For Windows:
+
 ```terminal
 set FLASK_APP=app
 ```
 
 To run:
+
 ```terminal
 pipenv run flask run
 ```
 
 Or if you're in the pipenv shell, run:
+
 ```terminal
 flask run
 ```
