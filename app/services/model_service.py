@@ -9,7 +9,7 @@ class ModelService:
     def get_model(model_id: int) -> Optional[ModelMetadata]:
         # TODO (jihyo): Implement this function
         return ModelMetadata(model_class="logistic", learning_rate=0.1, k=2)
-    
+
     def train(model_metadata: ModelMetadata) -> TrainResult:
         # TODO (jaehoon) : Implement this function
         return TrainResult(model_id=1, train_acc=0.5, valid_acc=0.5)
@@ -18,4 +18,3 @@ class ModelService:
     def predict(model_id: int, applicant: Applicant) -> bool:
         # TODO (kyungmin): Implement this function
         return False
-    

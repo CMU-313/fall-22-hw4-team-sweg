@@ -33,7 +33,8 @@ class ModelList(Resource):
     @api.response(400, "Invalid input")
     def post(self) -> Tuple[Dict[str, Any], int]:
         """Trains a model with the client specified model class and hyperparameters"""
-        return ModelService.train(ModelMetadata(model_class="linear", learning_rate=0.5)), 201
+        return ModelService.train(
+            ModelMetadata(model_class="linear", learning_rate=0.5)), 201
 
 
 @api.route("/<int:model_id>/predict")
