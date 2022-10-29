@@ -32,10 +32,6 @@ jobs:
       - name: Move to flask folder
         run: |
           cd app
-      - name: Run isort
-        uses: isort/isort-action@master
-        with:
-          configuration: .
       - name: Run yapf
         id: autoyapf
         uses: mritunjaysharma394/autoyapf@v2
@@ -50,10 +46,10 @@ jobs:
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com' 
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          git config pull.rebase true
+          git config pull.rebase false
           git commit -am "Automated format fixes"
           git pull origin ${{ github.head_ref }}
-          git push origin HEAD:${{ github.head_ref }}
+          git push origin HEAD:${{ github.head_ref }} --force
       - name: Run test suite
         run: |
           pipenv run pytest
