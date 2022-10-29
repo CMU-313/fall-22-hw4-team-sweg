@@ -1,10 +1,18 @@
 from dataclasses import dataclass
+from typing import Optional
 
 from flask_restx import fields
 
 
 @dataclass(frozen=True)
 class ModelMetadata:
+    model_class: str
+    learning_rate: float
+    k: Optional[int] = None
+
+
+@dataclass(frozen=True)
+class ModelMetadataFields:
     model_class: fields.String = fields.String(
         title="Model class",
         description="The name of the model class",

@@ -4,7 +4,7 @@ from flask_restx import fields
 
 
 @dataclass(frozen=True)
-class PredictionResult:
+class PredictionResultFields:
     model_id: fields.Integer = fields.Integer(
         title="Model ID",
         description="The ID of the model used to make prediction",

@@ -1,4 +1,4 @@
-from .applicant import Applicant
-from .model_metadata import ModelMetadata
-from .prediction import PredictionResult
-from .train import TrainResult
+from .applicant import Applicant, ApplicantFields
+from .model_metadata import ModelMetadata, ModelMetadataFields
+from .prediction import PredictionResultFields
+from .train import TrainResultFields
