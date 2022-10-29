@@ -4,6 +4,7 @@ from app.dtos import Applicant, ModelMetadata
 
 
 class ModelService:
+
     @staticmethod
     def get_model(model_id: int) -> Optional[ModelMetadata]:
         # TODO (jihyo): Implement this function

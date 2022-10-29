@@ -9,6 +9,7 @@ from app.services import ModelService
 
 
 class TestModels:
+
     @pytest.fixture
     def client(self) -> Generator[FlaskClient, None, None]:
         with app.test_client() as client:
@@ -28,7 +29,11 @@ class TestModels:
         assert data["message"] == "Invalid model ID"
 
         # Age must be between 15 and 22
-        resp = client.post(url.format(1), json={"age": 40, "family_size": True})
+        resp = client.post(url.format(1),
+                           json={
+                               "age": 40,
+                               "family_size": True
+                           })
         assert resp.status_code == 400
 
         applicant = {

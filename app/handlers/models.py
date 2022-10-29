@@ -9,15 +9,16 @@ from app.services import ModelService
 
 api = Namespace(name="models", description="Models API")
 applicant = api.model(name="Applicant", model=asdict(ApplicantFields()))
-model_metadata = api.model(name="ModelMetadata", model=asdict(ModelMetadataFields()))
+model_metadata = api.model(name="ModelMetadata",
+                           model=asdict(ModelMetadataFields()))
 train_result = api.model(name="TrainResult", model=asdict(TrainResult()))
-prediction_result = api.model(
-    name="PredictionResult", model=asdict(PredictionResultFields())
-)
+prediction_result = api.model(name="PredictionResult",
+                              model=asdict(PredictionResultFields()))
 
 
 @api.route("")
 class ModelList(Resource):
+
     def get(self) -> Dict[str, Any]:
         # TODO (jihyo): Function Comment
         return {}
@@ -33,6 +34,7 @@ class ModelList(Resource):
 @api.route("/<int:model_id>/predict")
 @api.param("model_id", description="The model ID")
 class ModelPrediction(Resource):
+
     @api.expect(applicant)
     @api.marshal_with(prediction_result, code=200)
     @api.response(400, "Invalid input")
@@ -44,4 +46,7 @@ class ModelPrediction(Resource):
         # TODO (kyungmin): Implement the endpoint
         if not ModelService.get_model(model_id):
             api.abort(404, "Model does not exist")
-        return {"model_id": model_id, "success": ModelService.predict(model_id, {})}
+        return {
+            "model_id": model_id,
+            "success": ModelService.predict(model_id, {})
+        }
