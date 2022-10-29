@@ -1,4 +1,4 @@
 from .applicant import Applicant
-from .prediction import PredictionResult
 from .model_metadata import ModelMetadata
+from .prediction import PredictionResult
 from .train import TrainResult

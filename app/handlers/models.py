@@ -3,7 +3,7 @@ from typing import Any, Dict
 
 from flask_restx import Namespace, Resource
 
-from app.dtos import Applicant, PredictionResult, ModelMetadata, TrainResult
+from app.dtos import Applicant, ModelMetadata, PredictionResult, TrainResult
 
 api = Namespace(name="models", description="Models API")
 applicant = api.model(name="Applicant", model=asdict(Applicant()))

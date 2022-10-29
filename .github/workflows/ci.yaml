@@ -32,10 +32,6 @@ jobs:
       - name: Move to flask folder
         run: |
           cd app
-      - name: Run isort
-        uses: isort/isort-action@master
-        with:
-          configuration: .
       - name: Run yapf
         id: autoyapf
         uses: mritunjaysharma394/autoyapf@v2
