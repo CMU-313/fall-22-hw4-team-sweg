@@ -16,11 +16,10 @@ class TrainResult:
         description="Model accuracy tested on training set",
         required=True,
         min=0.0,
-        max=1.0
-    )
+        max=1.0)
     valid_acc: fields.Float = fields.Float(
         title="Validation accuracy",
         description="Model accuracy tested on validation set",
         min=0.0,
         max=1.0,
-    ) 
+    )
