@@ -1,5 +1,9 @@
-name: SWEg CD
+name: SWEg CI/CD
 on:
+  pull_request:
+    branches:
+      - "main"
+    tags: [v*]
   push:
     branches:
       - "main"

@@ -72,7 +72,6 @@ class TestModels:
 
         # Model ID must be positive
         resp = client.post(url.format(0))
-        data = resp.get_json()
         assert resp.status_code == 400
 
         # Age must be between 15 and 22
@@ -94,7 +93,6 @@ class TestModels:
         # Model must exist
         with patch.object(ModelService, "get_model", return_value=None):
             resp = client.post(url.format(1), json=applicant)
-            data = resp.get_json()
             assert resp.status_code == 404
 
         # Returns desired data
