@@ -1,10 +1,11 @@
 from dataclasses import asdict
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 
 from flask_restx import Namespace, Resource
 
 from app.dtos import (
     ApplicantFields,
+    ModelMetadata,
     ModelMetadataFields,
     PredictionResultFields,
     TrainResultFields,
@@ -30,9 +31,10 @@ class ModelList(Resource):
     @api.expect(model_metadata)
     @api.marshal_with(train_result, code=201)
     @api.response(400, "Invalid input")
-    def post(self) -> Dict[str, Any]:
+    def post(self) -> Tuple[Dict[str, Any], int]:
         """Trains a model with the client specified model class and hyperparameters"""
-        return {"model_id": 1, "train_acc": 0.1, "valid_acc": 0.1}
+        return ModelService.train(
+            ModelMetadata(model_class="linear", learning_rate=0.5)), 201
 
 
 @api.route("/<int:model_id>/predict")
@@ -43,7 +45,7 @@ class ModelPrediction(Resource):
     @api.marshal_with(prediction_result, code=200)
     @api.response(400, "Invalid input")
     @api.response(404, "Model does not exist")
-    def post(self, model_id: int) -> Dict[str, Any]:
+    def post(self, model_id: int) -> Tuple[Dict[str, Any], int]:
         """Predicts the success of an applicant using a given model"""
         if model_id <= 0:
             api.abort(400, "Invalid model ID")
@@ -52,5 +54,5 @@ class ModelPrediction(Resource):
             api.abort(404, "Model does not exist")
         return {
             "model_id": model_id,
-            "success": ModelService.predict(model_id, {})
-        }
+            "success": ModelService.predict(model_id, {}),
+        }, 200

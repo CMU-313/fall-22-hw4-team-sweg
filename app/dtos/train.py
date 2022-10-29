@@ -4,6 +4,13 @@ from flask_restx import fields
 
 
 @dataclass(frozen=True)
+class TrainResult:
+    model_id: int
+    train_acc: float
+    valid_acc: float
+
+
+@dataclass(frozen=True)
 class TrainResultFields:
     model_id: fields.Integer = fields.Integer(
         title="Model ID",
