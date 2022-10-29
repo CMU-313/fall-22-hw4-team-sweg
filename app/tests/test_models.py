@@ -26,7 +26,6 @@ class TestModels:
         resp = client.post(url.format(0))
         data = resp.get_json()
         assert resp.status_code == 400
-        assert data["message"] == "Invalid model ID"
 
         # Age must be between 15 and 22
         resp = client.post(url.format(1),
@@ -49,7 +48,6 @@ class TestModels:
             resp = client.post(url.format(1), json=applicant)
             data = resp.get_json()
             assert resp.status_code == 404
-            assert data["message"] == "Model does not exist"
 
         # Returns desired data
         with patch.object(ModelService, "predict", return_value=True):
