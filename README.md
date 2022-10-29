@@ -10,7 +10,7 @@ Please consult the [homework assignment](https://cmu-313.github.io//assignments/
 
 #### Prereqs
 
-- The version of Python you and your team will be using (version greater than 3.8)
+- Python 3.8
 - pip package manager is updated to latest version
 - For additional resources, check out [this link](https://pipenv-fork.readthedocs.io/en/latest/install.html#installing-pipenv)
 
@@ -31,7 +31,7 @@ The same instructions for Mac OS **should** work for windows, but if it doesn't,
 #### Downloading Packages
 
 The repository contains `Pipfile` that declares which packages are necessary to run the `model_build.ipnyb`.
-To install packages declared by the Pipfile, run `pipenv install -d` in the command line from the root directory.
+To install packages declared by the Pipfile, run `pipenv install --dev` in the command line from the root directory.
 
 You might want to use additional packages throughout the assignment.
 To do so, run `pipenv install [PACKAGE_NAME]`, as you would install python packages using pip.
@@ -62,33 +62,38 @@ pipenv run jupyter notebook
 You should also use pipenv to run your Flask API server.
 To do so, execute the following commands from the `app` directory in the pip venv shell.
 
-
 Set an environment variable for FLASK_APP.
 For Mac and Linux:
+
 ```terminal
 export FLASK_APP=app.py
 ```
 
 For Windows:
+
 ```terminal
 set FLASK_APP=app
 ```
 
 To run:
+
 ```terminal
 pipenv run flask run
 ```
 
 Or if you're in the pipenv shell, run:
+
 ```terminal
 flask run
 ```
 
-You can alter the port number that is used by the Flask server by changing the following line in `app/app.py`:
+You can alter the port number that is used by the Flask server by changing the following line in `app/.flaskenv`:
 
-```python
-app.run(host="0.0.0.0", debug=True, port=80)
+```sh
+FLASK_RUN_PORT=8000
 ```
+
+After filling up decorators for each endpoint, Swagger API documentation is automatically generated and available from the `/api/docs` URL of the server. For decorator rules and examples, refer to [Flask-RESTX Swagger documentation](https://flask-restx.readthedocs.io/en/latest/swagger.html#swagger-documentation).
 
 ## Testing
 
