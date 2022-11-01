@@ -6,7 +6,7 @@ import pytest
 from flask.testing import FlaskClient
 
 from app.app import app
-from app.dtos import PredictionResult, TrainResult
+from app.dtos import ModelMetadata, PredictionResult, TrainResult
 from app.services import ModelService
 
 
@@ -111,7 +111,7 @@ class TestModels:
             assert data["model_id"] == 2
             assert not data["success"]
 
-    def test_get_model_metadata(self, client: FlaskClient) -> None:
+    def test_get_model(self, client: FlaskClient) -> None:
         url = "/api/models/{}"
 
         # Model ID must be a number
