@@ -2,7 +2,11 @@ from dataclasses import dataclass
 
 from flask_restx import fields
 
-
+@dataclass(frozen=True)
+class PredictionResult:
+    model_id: int
+    success: bool
+    
 @dataclass(frozen=True)
 class PredictionResultFields:
     model_id: fields.Integer = fields.Integer(

@@ -1,5 +1,5 @@
 from dataclasses import asdict
-from typing import Any, Dict, Tuple
+from typing import Tuple, List
 
 from flask_restx import Namespace, Resource
 
@@ -8,7 +8,7 @@ from app.dtos import (
     ModelMetadata,
     ModelMetadataFields,
     PredictionResultFields,
-    TrainResultFields,
+    TrainResultFields, TrainResult, Applicant, PredictionResult,
 )
 from app.services import ModelService
 
@@ -23,20 +23,15 @@ prediction_result = api.model(name="PredictionResult",
 
 @api.route("")
 class ModelList(Resource):
-    #@api.param("model_id", description="The model ID")
-    @api.marshal_with(model_metadata, code=200)
-    @api.response(400, "Invalid input")
-    def get(self, model_id: int) -> Dict[str, Any]:
-        # TODO (jihyo): Function Comment
+    @api.marshal_with(model_metadata, as_list=True, code=200)
+    def get(self) -> Tuple[List[ModelMetadata], int]:
         """Gets the list of modelMetadata"""
-        if model_id <= 0:
-            api.abort(400, "Invalid model ID")
-        return ModelService.get_model(model_id)
+        return ModelService.get_model_list(), 200
 
     @api.expect(model_metadata)
     @api.marshal_with(train_result, code=201)
     @api.response(400, "Invalid input")
-    def post(self) -> Tuple[Dict[str, Any], int]:
+    def post(self) -> Tuple[TrainResult, int]:
         """Trains a model with the client specified model class and hyperparameters"""
         return ModelService.train(
             ModelMetadata(model_class="linear", learning_rate=0.5)), 201
@@ -50,14 +45,11 @@ class ModelPrediction(Resource):
     @api.marshal_with(prediction_result, code=200)
     @api.response(400, "Invalid input")
     @api.response(404, "Model does not exist")
-    def post(self, model_id: int) -> Tuple[Dict[str, Any], int]:
+    def post(self, model_id: int) -> Tuple[PredictionResult, int]:
         """Predicts the success of an applicant using a given model"""
         if model_id <= 0:
             api.abort(400, "Invalid model ID")
         # TODO (kyungmin): Implement the endpoint
         if not ModelService.get_model(model_id):
             api.abort(404, "Model does not exist")
-        return {
-            "model_id": model_id,
-            "success": ModelService.predict(model_id, {}),
-        }, 200
+        return ModelService.predict(model_id, Applicant()), 200
