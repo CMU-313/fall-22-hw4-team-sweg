@@ -25,6 +25,7 @@ prediction_result = api.model(name="PredictionResult",
 class ModelList(Resource):
     #@api.param("model_id", description="The model ID")
     @api.marshal_with(model_metadata, code=200)
+    @api.response(400, "Invalid input")
     def get(self, model_id: int) -> Dict[str, Any]:
         # TODO (jihyo): Function Comment
         """Gets the list of modelMetadata"""
