@@ -16,6 +16,11 @@ class ModelService:
         return []
 
     @staticmethod
+    def delete(model_id: int) -> None:
+        # TODO (victor): Implement this function
+        return None
+
+    @staticmethod
     def train(model_metadata: ModelMetadata) -> TrainResult:
         # TODO (jaehoon): Implement this function
         return TrainResult(model_id=1, train_acc=0.5, valid_acc=0.5)

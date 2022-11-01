@@ -87,6 +87,31 @@ class TestModels:
             assert 0 <= data["learning_rate"] <= 1
             assert data["k"] == 2
 
+    def test_delete_model(self, client: FlaskClient) -> None:
+        url = "/api/models/{}"
+
+        # Model ID must be an integer
+        resp = client.delete(url.format("testinginput"))
+        assert resp.status_code == 404
+
+        # Model ID must be positive
+        resp = client.delete(url.format(0))
+        assert resp.status_code == 400
+
+        # Model must exist to be deleted
+        with patch.object(ModelService, "get_model", return_value=None):
+            resp = client.delete(url.format(1))
+            assert resp.status_code == 404
+
+        # Successful deletion should return 204
+        with patch.object(
+            ModelService,
+            "get_model",
+            return_value=ModelMetadata(model_class="logistic", learning_rate=0.5),
+        ):
+            resp = client.delete(url.format(1))
+            assert resp.status_code == 204
+
     def test_predict(self, client: FlaskClient) -> None:
         url = "/api/models/{}/predict"
 
