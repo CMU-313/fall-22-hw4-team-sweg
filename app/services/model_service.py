@@ -9,6 +9,7 @@ class ModelService:
     def get_model(model_id: int) -> Optional[ModelMetadata]:
         return ModelMetadata(model_class="logistic", learning_rate=0.1, k=2)
 
+    @staticmethod
     def get_model_list() -> list[ModelMetadata]:
         # empty list so far, but should fetch the data from a
         # specific directory later, and parse out the data into
