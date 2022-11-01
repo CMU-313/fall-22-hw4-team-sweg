@@ -116,13 +116,13 @@ class TestModels:
 
         # Model ID must be a number
         resp = client.get(url.format("abcd"))
-        assert resp.status_code == 400
+        assert resp.status_code == 404
 
         # Model ID must be positive
         resp = client.get(url.format(0))
         assert resp.status_code == 400
 
         # Returns desired data
-        with patch.object(ModelService, "get_mode", return_value=Optional[ModelMetadata]):
+        with patch.object(ModelService, "get_model", return_value=Optional[ModelMetadata]):
             resp = client.get(url)
             assert resp.status_code == 200

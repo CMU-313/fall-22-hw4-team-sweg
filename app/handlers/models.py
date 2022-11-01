@@ -36,13 +36,18 @@ class ModelList(Resource):
         return ModelService.train(
             ModelMetadata(model_class="linear", learning_rate=0.5)), 201
 
-@api.route("/<int:model_id>/")
+@api.route("/<int:model_id>")
 @api.param("model_id", description="The model ID")
 class ModelMetadata(Resource):
     
     @api.marshal_with(model_metadata, code=200)
     @api.response(400, "Invalid input")
+    @api.response(404, "Model does not exist")
     def get(self, model_id: int) -> Tuple[Dict[str, Any], int]:
+        if model_id <= 0:
+            api.abort(400, "Invalid model ID")
+        if not ModelService.get_model(model_id):
+            api.abort(404, "Model does not exist")
         return ModelService.get_model(model_id), 200
 
 @api.route("/<int:model_id>/predict")
