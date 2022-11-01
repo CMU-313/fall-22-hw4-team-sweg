@@ -123,6 +123,11 @@ class TestModels:
         resp = client.get(url.format(0))
         assert resp.status_code == 400
 
+        # Model must exist
+        with patch.object(ModelService, "get_model", return_value=None):
+            resp = client.get(url)
+            assert resp.status_code == 404
+
         # Returns desired data
         with patch.object(ModelService, "get_model", return_value=ModelMetadata(model_class="linear", learning_rate=0.5, k=2)):
             resp = client.get(url)
