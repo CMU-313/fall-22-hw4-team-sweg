@@ -1,4 +1,5 @@
 from typing import Generator
+from typing import Optional
 from unittest.mock import patch
 
 import pytest
@@ -109,3 +110,19 @@ class TestModels:
             assert resp.status_code == 200
             assert data["model_id"] == 2
             assert not data["success"]
+
+    def test_get_model_metadata(self, client: FlaskClient) -> None:
+        url = "/api/models/{}"
+
+        # Model ID must be a number
+        resp = client.get(url.format("abcd"))
+        assert resp.status_code == 400
+
+        # Model ID must be positive
+        resp = client.get(url.format(0))
+        assert resp.status_code == 400
+
+        # Returns desired data
+        with patch.object(ModelService, "get_mode", return_value=Optional[ModelMetadata]):
+            resp = client.get(url)
+            assert resp.status_code == 200

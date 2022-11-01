@@ -36,6 +36,14 @@ class ModelList(Resource):
         return ModelService.train(
             ModelMetadata(model_class="linear", learning_rate=0.5)), 201
 
+@api.route("/<int:model_id>/")
+@api.param("model_id", description="The model ID")
+class ModelMetadata(Resource):
+    
+    @api.marshal_with(model_metadata, code=200)
+    @api.response(400, "Invalid input")
+    def get(self, model_id: int) -> Tuple[Dict[str, Any], int]:
+        return ModelService.get_model(model_id), 200
 
 @api.route("/<int:model_id>/predict")
 @api.param("model_id", description="The model ID")
