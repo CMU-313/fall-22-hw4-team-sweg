@@ -5,7 +5,7 @@ import pytest
 from flask.testing import FlaskClient
 
 from app.app import app
-from app.dtos import TrainResult
+from app.dtos import PredictionResult, TrainResult
 from app.services import ModelService
 
 
@@ -96,14 +96,14 @@ class TestModels:
             assert resp.status_code == 404
 
         # Returns desired data
-        with patch.object(ModelService, "predict", return_value=True):
+        with patch.object(ModelService, "predict", return_value=PredictionResult(model_id=1, success=True)):
             resp = client.post(url.format(1), json=applicant)
             data = resp.get_json()
             assert resp.status_code == 200
             assert data["model_id"] == 1
             assert data["success"]
 
-        with patch.object(ModelService, "predict", return_value=False):
+        with patch.object(ModelService, "predict", return_value=PredictionResult(model_id=2, success=False)):
             resp = client.post(url.format(2), json=applicant)
             data = resp.get_json()
             assert resp.status_code == 200
