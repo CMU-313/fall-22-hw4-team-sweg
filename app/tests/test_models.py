@@ -125,12 +125,12 @@ class TestModels:
 
         # Model must exist
         with patch.object(ModelService, "get_model", return_value=None):
-            resp = client.get(url)
+            resp = client.get(url.format(1))
             assert resp.status_code == 404
 
         # Returns desired data
         with patch.object(ModelService, "get_model", return_value=ModelMetadata(model_class="linear", learning_rate=0.5, k=2)):
-            resp = client.get(url)
+            resp = client.get(url.format(1))
             data = resp.get_json()
             assert resp.status_code == 200
             assert data["model_class"] == "linear"
