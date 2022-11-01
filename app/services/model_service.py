@@ -15,7 +15,7 @@ class ModelService:
         # specific directory later, and parse out the data into
         # a list
         return []
-    
+ 
     @staticmethod
     def train(model_metadata: ModelMetadata) -> TrainResult:
         # TODO (jaehoon): Implement this function

@@ -14,6 +14,12 @@ class PredictionResult:
 
 
 @dataclass(frozen=True)
+class PredictionResult:
+    model_id: int
+    success: bool
+
+
+@dataclass(frozen=True)
 class PredictionResultFields:
     model_id: fields.Integer = fields.Integer(
         title="Model ID",
