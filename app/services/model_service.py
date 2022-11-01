@@ -18,3 +18,8 @@ class ModelService:
     def predict(model_id: int, applicant: Applicant) -> bool:
         # TODO (kyungmin): Implement this function
         return False
+
+    @staticmethod
+    def delete(model_id: int) -> None:
+        # TODO (victor): Implement this function
+        return None
