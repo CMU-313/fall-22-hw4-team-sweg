@@ -7,6 +7,7 @@ from flask.testing import FlaskClient
 
 from app.app import app
 from app.dtos import TrainResult
+from app.dtos import ModelMetadata
 from app.services import ModelService
 
 
@@ -123,6 +124,10 @@ class TestModels:
         assert resp.status_code == 400
 
         # Returns desired data
-        with patch.object(ModelService, "get_model", return_value=Optional[ModelMetadata]):
+        with patch.object(ModelService, "get_model", return_value=ModelMetadata(model_class="linear", learning_rate=0.5, k=2)):
             resp = client.get(url)
+            data = resp.get_json()
             assert resp.status_code == 200
+            assert data["model_class"] == "linear"
+            assert 0 <= data["learning_rate"] <= 1
+            assert data["k"] == 2

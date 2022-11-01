@@ -38,7 +38,7 @@ class ModelList(Resource):
 
 @api.route("/<int:model_id>")
 @api.param("model_id", description="The model ID")
-class ModelMetadata(Resource):
+class Model(Resource):
     
     @api.marshal_with(model_metadata, code=200)
     @api.response(400, "Invalid input")
