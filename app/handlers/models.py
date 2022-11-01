@@ -23,10 +23,12 @@ prediction_result = api.model(name="PredictionResult",
 
 @api.route("")
 class ModelList(Resource):
-
-    def get(self) -> Dict[str, Any]:
+    #@api.param("model_id", description="The model ID")
+    @api.marshal_with(model_metadata, code=200)
+    def get(self, model_id: int) -> Dict[str, Any]:
         # TODO (jihyo): Function Comment
-        return {}
+        """Gets the list of modelMetadata"""
+        return ModelService.get_model(model_id)
 
     @api.expect(model_metadata)
     @api.marshal_with(train_result, code=201)
