@@ -8,7 +8,9 @@ from app.dtos import (Applicant, ApplicantFields, ModelMetadata,
                       PredictionResultFields, TrainResult, TrainResultFields)
 from app.services import ModelService
 
-api = Namespace(name="models", description="API endpoints to manage machine learning models")
+api = Namespace(
+    name="models", description="API endpoints to manage machine learning models"
+)
 applicant = api.model(name="Applicant", model=asdict(ApplicantFields()))
 model_metadata = api.model(name="ModelMetadata", model=asdict(ModelMetadataFields()))
 train_result = api.model(name="TrainResult", model=asdict(TrainResultFields()))
@@ -49,6 +51,7 @@ class Model(Resource):
             api.abort(404, "Model does not exist")
         return ModelService.get_model(model_id), 200
 
+    @api.marshal_with(None, code=204)
     @api.response(400, "Invalid input")
     @api.response(404, "Model does not exist")
     def delete(self, model_id: int) -> "":
