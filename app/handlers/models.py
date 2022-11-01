@@ -28,6 +28,8 @@ class ModelList(Resource):
     def get(self, model_id: int) -> Dict[str, Any]:
         # TODO (jihyo): Function Comment
         """Gets the list of modelMetadata"""
+        if model_id <= 0:
+            api.abort(400, "Invalid model ID")
         return ModelService.get_model(model_id)
 
     @api.expect(model_metadata)
