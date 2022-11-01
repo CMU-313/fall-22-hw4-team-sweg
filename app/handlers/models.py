@@ -1,5 +1,5 @@
 from dataclasses import asdict
-from typing import Tuple, List
+from typing import Tuple, List, Dict, Any
 
 from flask_restx import Namespace, Resource
 
