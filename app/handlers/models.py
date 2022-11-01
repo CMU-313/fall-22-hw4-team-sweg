@@ -50,6 +50,17 @@ class Model(Resource):
             api.abort(404, "Model does not exist")
         return ModelService.get_model(model_id), 200
 
+    @api.response(400, "Invalid input")
+    @api.response(404, "Model does not exist")
+    def delete(self, model_id: int) -> '':
+        '''Delete a model given its id'''
+        if model_id <= 0:
+            api.abort(400, "Invalid model ID")
+        if not ModelService.get_model(model_id):
+            api.abort(404, "Model does not exist")
+        ModelService.delete(model_id)
+        return '', 204
+
 @api.route("/<int:model_id>/predict")
 @api.param("model_id", description="The model ID")
 class ModelPrediction(Resource):
