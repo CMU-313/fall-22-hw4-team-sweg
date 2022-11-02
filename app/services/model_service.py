@@ -1,10 +1,9 @@
-from typing import Optional, List
+from typing import List, Optional
 
-from app.dtos import Applicant, ModelMetadata, TrainResult, PredictionResult
+from app.dtos import Applicant, ModelMetadata, PredictionResult, TrainResult
 
 
 class ModelService:
-
     @staticmethod
     def get_model(model_id: int) -> Optional[ModelMetadata]:
         return ModelMetadata(model_class="logistic", learning_rate=0.1, k=2)
@@ -15,7 +14,12 @@ class ModelService:
         # specific directory later, and parse out the data into
         # a list
         return []
- 
+
+    @staticmethod
+    def delete(model_id: int) -> None:
+        # TODO (victor): Implement this function
+        return None
+
     @staticmethod
     def train(model_metadata: ModelMetadata) -> TrainResult:
         # TODO (jaehoon): Implement this function
