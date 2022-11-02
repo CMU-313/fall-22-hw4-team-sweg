@@ -1,4 +1,6 @@
-from typing import Generator
+import random
+from dataclasses import asdict
+from typing import Generator, List
 from unittest.mock import patch
 
 import pytest
@@ -15,41 +17,37 @@ class TestModels:
         with app.test_client() as client:
             yield client
 
-    def test_get_model_list(self, client: FlaskClient) -> None:
+    @pytest.fixture
+    def three_models(self) -> List[ModelMetadata]:
+        return [
+            ModelMetadata(
+                model_class=random.choice(["logistic", "linear"]),
+                learning_rate=random.random(),
+                k=random.randint(1, 10) if i % 2 else None,
+            )
+            for i in range(3)
+        ]
+
+    def test_get_model_list(self, client: FlaskClient, three_models) -> None:
         url = "/api/models"
-        
+
         # Empty list
-        with patch.object(ModelService, "get_model_list", 
-                          return_value=[]):
-            resp = client.post(url,
-                               json={})
+        with patch.object(ModelService, "get_model_list", return_value=[]):
+            resp = client.get(url)
             data = resp.get_json()
             assert resp.status_code == 200
-        # non-empty list
-        with patch.object(ModelService, "get_model_list", 
-                          return_value=[{"model_class": "logistic",
-                                         "learning_rate": 0.5,
-                                         "k": 5},
-                                        {"model_class": "linear",
-                                         "learning_rate": 0.7,
-                                         "k": None}]):
-            resp = client.post(url,
-                               json=[{"model_class": "logistic",
-                                         "learning_rate": 0.5,
-                                         "k": 5},
-                                        {"model_class": "linear",
-                                         "learning_rate": 0.7,
-                                         "k": None}])
+            assert data == []
+
+        # Non-empty list
+        with patch.object(ModelService, "get_model_list", return_value=three_models):
+            resp = client.get(url)
             data = resp.get_json()
             assert resp.status_code == 200
-            assert data[0]["model_class"] == "logistic"
-            assert data[0]["learning_rate"] == 0.5
-            assert data[0]["k"] == 5
-            assert data[1]["model_class"] == "linear"
-            assert data[1]["learning_rate"] == 0.7
-            assert data[1]["k"] == None
-            
-    def test_post_model(self, client: FlaskClient) -> None:
+            assert type(data) == list
+            assert len(data) == len(three_models)
+            assert all(m1 == asdict(m2) for m1, m2 in zip(data, three_models))
+
+    def test_create_model(self, client: FlaskClient) -> None:
         url = "/api/models"
 
         # Returns desired data

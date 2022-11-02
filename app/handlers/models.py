@@ -51,10 +51,10 @@ class Model(Resource):
             api.abort(404, "Model does not exist")
         return ModelService.get_model(model_id), 200
 
-    @api.marshal_with(None, code=204)
+    @api.response(204, "Success")
     @api.response(400, "Invalid input")
     @api.response(404, "Model does not exist")
-    def delete(self, model_id: int) -> "":
+    def delete(self, model_id: int) -> Tuple[str, int]:
         """Deletes a model with a given ID"""
         if model_id <= 0:
             api.abort(400, "Invalid model ID")
