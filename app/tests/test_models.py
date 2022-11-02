@@ -17,6 +17,40 @@ class TestModels:
         with app.test_client() as client:
             yield client
 
+    def test_get_model_list(self, client: FlaskClient) -> None:
+        url = "/api/models"
+        
+        # Empty list
+        with patch.object(ModelService, "get_model_list", 
+                          return_value=[]):
+            resp = client.post(url,
+                               json={})
+            data = resp.get_json()
+            assert resp.status_code == 200
+        # non-empty list
+        with patch.object(ModelService, "get_model_list", 
+                          return_value=[{"model_class": "logistic",
+                                         "learning_rate": 0.5,
+                                         "k": 5},
+                                        {"model_class": "linear",
+                                         "learning_rate": 0.7,
+                                         "k": None}]):
+            resp = client.post(url,
+                               json=[{"model_class": "logistic",
+                                         "learning_rate": 0.5,
+                                         "k": 5},
+                                        {"model_class": "linear",
+                                         "learning_rate": 0.7,
+                                         "k": None}])
+            data = resp.get_json()
+            assert resp.status_code == 200
+            assert data[0]["model_class"] == "logistic"
+            assert data[0]["learning_rate"] == 0.5
+            assert data[0]["k"] == 5
+            assert data[1]["model_class"] == "linear"
+            assert data[1]["learning_rate"] == 0.7
+            assert data[1]["k"] == None
+            
     def test_post_model(self, client: FlaskClient) -> None:
         url = "/api/models"
 
