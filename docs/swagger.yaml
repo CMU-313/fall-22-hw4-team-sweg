@@ -39,6 +39,18 @@ paths:
         name: model_id
         required: true
         type: integer
+    delete:
+      responses:
+        '204':
+          description: Success
+        '400':
+          description: Invalid input
+        '404':
+          description: Model does not exist
+      summary: Deletes a model with a given ID
+      operationId: delete_model
+      tags:
+        - models
     get:
       responses:
         '200':
@@ -51,18 +63,6 @@ paths:
           description: Model does not exist
       summary: Gets a model with a given ID
       operationId: get_model
-      tags:
-        - models
-    delete:
-      responses:
-        '204':
-          description: Success
-        '400':
-          description: Invalid input
-        '404':
-          description: Model does not exist
-      summary: Deletes a model with a given ID
-      operationId: delete_model
       tags:
         - models
   /models/{model_id}/predict:
@@ -96,6 +96,9 @@ info:
   title: Team SWEg API
   version: '1.0'
   description: API endpoints for a microservice that predicts potential applicant success using machine learning.
+  contact:
+    name: Team SWEg (Eric Fan, Jihyo Chung, Kyungmin Kim, Leo Jung, Victor Waddell)
+    url: https://github.com/CMU-313/fall-22-hw4-team-sweg
 produces:
   - application/json
 consumes:
