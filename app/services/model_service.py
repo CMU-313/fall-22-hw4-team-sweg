@@ -1,25 +1,31 @@
-from typing import Optional
+from typing import List, Optional
 
-from app.dtos import Applicant, ModelMetadata, TrainResult
+from app.dtos import Applicant, ModelMetadata, PredictionResult, TrainResult
 
 
 class ModelService:
-
     @staticmethod
     def get_model(model_id: int) -> Optional[ModelMetadata]:
-        # TODO (jihyo): Implement this function
         return ModelMetadata(model_class="logistic", learning_rate=0.1, k=2)
 
-    def train(model_metadata: ModelMetadata) -> TrainResult:
-        # TODO (jaehoon) : Implement this function
-        return TrainResult(model_id=1, train_acc=0.5, valid_acc=0.5)
-
     @staticmethod
-    def predict(model_id: int, applicant: Applicant) -> bool:
-        # TODO (kyungmin): Implement this function
-        return False
+    def get_model_list() -> List[ModelMetadata]:
+        # empty list so far, but should fetch the data from a
+        # specific directory later, and parse out the data into
+        # a list
+        return []
 
     @staticmethod
     def delete(model_id: int) -> None:
         # TODO (victor): Implement this function
         return None
+
+    @staticmethod
+    def train(model_metadata: ModelMetadata) -> TrainResult:
+        # TODO (jaehoon): Implement this function
+        return TrainResult(model_id=1, train_acc=0.5, valid_acc=0.5)
+
+    @staticmethod
+    def predict(model_id: int, applicant: Applicant) -> PredictionResult:
+        # TODO (kyungmin): Implement this function
+        return PredictionResult(model_id=model_id, success=False)
