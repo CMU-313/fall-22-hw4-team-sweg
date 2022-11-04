@@ -7,6 +7,7 @@ from flask_restx import fields
 @dataclass(frozen=True)
 class ModelMetadata:
     model_class: str
+    num_features: int
     learning_rate: float
     k: Optional[int] = None
 
@@ -19,9 +20,16 @@ class ModelMetadataFields:
         enum=["logistic", "linear"],
         required=True,
     )
+    num_features: fields.Integer = fields.Integer(
+        title="Number of features",
+        description="The number of features to select from the original dataset",
+        min=1,
+        max=51,
+        required=True,
+    )
     learning_rate: fields.Float = fields.Float(
-        title="Predicted success",
-        description="The success of the given applicant predicted by the model",
+        title="Learning rate",
+        description="The learning rate to train a model",
         required=True,
     )
     k: fields.Integer = fields.Integer(

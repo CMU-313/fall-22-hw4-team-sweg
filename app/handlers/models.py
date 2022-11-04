@@ -1,18 +1,11 @@
 from dataclasses import asdict
 from typing import List, Tuple
 
-from flask_restx import Namespace, Resource, reqparse
+from flask_restx import Namespace, Resource
 
-from app.dtos import (
-    Applicant,
-    ApplicantFields,
-    ModelMetadata,
-    ModelMetadataFields,
-    PredictionResult,
-    PredictionResultFields,
-    TrainResult,
-    TrainResultFields,
-)
+from app.dtos import (Applicant, ApplicantFields, ModelMetadata,
+                      ModelMetadataFields, PredictionResult,
+                      PredictionResultFields, TrainResult, TrainResultFields)
 from app.services import ModelService
 
 api = Namespace(
@@ -39,7 +32,11 @@ class ModelList(Resource):
     def post(self) -> Tuple[TrainResult, int]:
         """Creates and trains a model with given model class and hyperparameters"""
         return (
-            ModelService.train(ModelMetadata(model_class="linear", learning_rate=0.5)),
+            ModelService.train(
+                ModelMetadata(
+                    model_class="logistic", num_features=10, learning_rate=0.5
+                )
+            ),
             201,
         )
 

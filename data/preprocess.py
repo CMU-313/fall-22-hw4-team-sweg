@@ -1,17 +1,19 @@
 import pandas as pd
-from sklearn.preprocessing import OrdinalEncoder
+from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
 
 
 def preprocess() -> None:
-    print("Preprocessing the dataset for logistic regression...", end="")
+    print("Preprocessing the dataset...", end="")
     df = pd.read_csv("student-mat.csv", sep=";")
-    oe = OrdinalEncoder()
-    ordinal_columns_set = {
+
+    category_columns = [
         "school",
         "sex",
         "address",
         "famsize",
         "Pstatus",
+        "Medu",
+        "Fedu",
         "Mjob",
         "Fjob",
         "reason",
@@ -24,15 +26,19 @@ def preprocess() -> None:
         "higher",
         "internet",
         "romantic",
-    }
-    ordinal_columns = list(ordinal_columns_set)
-    logistic_df = pd.DataFrame(
-        data=oe.fit_transform(df[ordinal_columns]), columns=ordinal_columns
+    ]
+    oe = OrdinalEncoder()
+    ohe = OneHotEncoder(drop="if_binary", sparse=False)
+    one_hot_df = pd.DataFrame(
+        data=ohe.fit_transform(oe.fit_transform(df[category_columns])),
+        columns=ohe.get_feature_names_out(input_features=category_columns),
     )
+    category_column_set = set(category_columns)
     for column in df.columns:
-        if column not in ordinal_columns_set:
-            logistic_df[column] = df[column]
-    logistic_df.to_csv(path_or_buf="student-mat-logistic.csv", sep=";", index=False)
+        if column not in category_column_set:
+            one_hot_df[column] = df[column]
+    one_hot_df.to_csv(path_or_buf="student-mat-preprocessed.csv", sep=";", index=False)
+
     print("DONE!")
 
 
