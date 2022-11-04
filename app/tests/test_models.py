@@ -58,7 +58,13 @@ class TestModels:
             return_value=TrainResult(model_id=1, train_acc=0.5, valid_acc=0.5),
         ):
             resp = client.post(
-                url, json={"model_class": "logistic", "num_features": 10, "learning_rate": 0.5, "k": 2}
+                url,
+                json={
+                    "model_class": "logistic",
+                    "num_features": 10,
+                    "learning_rate": 0.5,
+                    "k": 2,
+                },
             )
             data = resp.get_json()
             assert resp.status_code == 201
@@ -72,7 +78,13 @@ class TestModels:
             return_value=TrainResult(model_id=2, train_acc=0.5, valid_acc=0.5),
         ):
             resp = client.post(
-                url, json={"model_class": "linear", "num_features": 10, "learning_rate": 2.5, "k": 10}
+                url,
+                json={
+                    "model_class": "linear",
+                    "num_features": 10,
+                    "learning_rate": 2.5,
+                    "k": 10,
+                },
             )
             data = resp.get_json()
             assert resp.status_code == 201
@@ -111,7 +123,9 @@ class TestModels:
         with patch.object(
             ModelService,
             "get_model",
-            return_value=ModelMetadata(model_class="linear", num_features=10, learning_rate=0.5, k=2),
+            return_value=ModelMetadata(
+                model_class="linear", num_features=10, learning_rate=0.5, k=2
+            ),
         ):
             resp = client.get(url.format(1))
             data = resp.get_json()
@@ -141,7 +155,9 @@ class TestModels:
         with patch.object(
             ModelService,
             "get_model",
-            return_value=ModelMetadata(model_class="logistic", num_features=10, learning_rate=0.5),
+            return_value=ModelMetadata(
+                model_class="logistic", num_features=10, learning_rate=0.5
+            ),
         ):
             resp = client.delete(url.format(1))
             assert resp.status_code == 204
