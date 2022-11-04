@@ -47,7 +47,6 @@ class ModelService:
         if model_class not in ["linear", "logistic"]:
             raise ValueError(f"Unsupported model class: {model_class}")
 
-        model_class = "linear"
         file_path = Path().cwd().parent.joinpath(f"data/student-mat-preprocessed.csv")
         df = pd.read_csv(file_path, sep=";")
         X, y = df.loc[:, ~df.columns.isin(["G1", "G2", "G3"])], None

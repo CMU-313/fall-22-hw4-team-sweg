@@ -22,14 +22,14 @@ class ModelMetadataFields:
     )
     num_features: fields.Integer = fields.Integer(
         title="Number of features",
-        description="The number of features to select from the original dataset",
+        description="The number of features to select for training",
         min=1,
         max=51,
         required=True,
     )
     learning_rate: fields.Float = fields.Float(
         title="Learning rate",
-        description="The learning rate to train a model",
+        description="The learning rate to train a model with",
         required=True,
     )
     k: fields.Integer = fields.Integer(
