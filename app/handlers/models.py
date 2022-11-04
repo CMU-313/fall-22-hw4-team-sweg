@@ -32,7 +32,11 @@ class ModelList(Resource):
     def post(self) -> Tuple[TrainResult, int]:
         """Creates and trains a model with given model class and hyperparameters"""
         return (
-            ModelService.train(ModelMetadata(model_class="linear", learning_rate=0.5)),
+            ModelService.train(
+                ModelMetadata(
+                    model_class="logistic", num_features=10, learning_rate=0.5
+                )
+            ),
             201,
         )
 
