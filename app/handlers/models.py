@@ -1,11 +1,18 @@
 from dataclasses import asdict
 from typing import List, Tuple
 
-from flask_restx import Namespace, Resource
+from flask_restx import Namespace, Resource, reqparse
 
-from app.dtos import (Applicant, ApplicantFields, ModelMetadata,
-                      ModelMetadataFields, PredictionResult,
-                      PredictionResultFields, TrainResult, TrainResultFields)
+from app.dtos import (
+    Applicant,
+    ApplicantFields,
+    ModelMetadata,
+    ModelMetadataFields,
+    PredictionResult,
+    PredictionResultFields,
+    TrainResult,
+    TrainResultFields,
+)
 from app.services import ModelService
 
 api = Namespace(
