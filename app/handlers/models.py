@@ -1,7 +1,7 @@
 from dataclasses import asdict
 from typing import List, Tuple
 
-from flask_restx import Namespace, Resource
+from flask_restx import Namespace, Resource, reqparse
 
 from app.dtos import (Applicant, ApplicantFields, ModelMetadata,
                       ModelMetadataFields, PredictionResult,
@@ -31,14 +31,22 @@ class ModelList(Resource):
     @api.response(400, "Invalid input")
     def post(self) -> Tuple[TrainResult, int]:
         """Creates and trains a model with given model class and hyperparameters"""
+        parser = reqparse.RequestParser()
+        parser.add_argument('model_class', required=True, type=str)
+        parser.add_argument('score_func', required=True, type=str)
+        parser.add_argument('num_features', required=True, type=int)
+        parser.add_argument('learning_rate', required=True, type=int)
+        parser.add_argument('k', required=True, type=int)
+        args = parser.parse_args()
+
         return (
             ModelService.train(
                 ModelMetadata(
-                    model_class="logistic",
-                    score_func="f_classif",
-                    num_features=10,
-                    learning_rate=0.5,
-                    k=5,
+                    model_class=args["model_class"],
+                    score_func=args["score_func"],
+                    num_features=args["num_features"],
+                    learning_rate=args["learning_rate"],
+                    k=args["k"],
                 )
             ),
             201,
