@@ -5,18 +5,17 @@ from flask_restx import fields
 
 @dataclass(frozen=True)
 class TrainResult:
-    model_id: int
+    model_id: str
     train_acc: float
     valid_acc: float
 
 
 @dataclass(frozen=True)
 class TrainResultFields:
-    model_id: fields.Integer = fields.Integer(
+    model_id: fields.String = fields.String(
         title="Model ID",
         description="The ID of the created model",
         required=True,
-        min=1,
     )
     train_acc: fields.Float = fields.Float(
         title="Training accuracy",

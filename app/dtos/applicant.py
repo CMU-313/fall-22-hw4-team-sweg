@@ -5,7 +5,36 @@ from flask_restx import fields
 
 @dataclass(frozen=True)
 class Applicant:
-    pass
+    school: bool
+    sex: bool
+    age: int
+    address: bool
+    family_size: bool
+    p_status: bool
+    mother_edu: int
+    father_edu: int
+    mother_job: int
+    father_job: int
+    reason: int
+    guardian: int
+    travel_time: int
+    study_time: int
+    failures: int
+    school_support: bool
+    family_support: bool
+    paid: bool
+    activities: bool
+    nursery: bool
+    higher: bool
+    internet: bool
+    romantic: bool
+    family_rel: int
+    free_time: int
+    going_out: int
+    workday_alcohol: int
+    weekend_alcohol: int
+    health: int
+    absences: int
 
 
 @dataclass(frozen=True)
@@ -105,10 +134,10 @@ class ApplicantFields:
         title="Higher",
         description="Wants to take higher education (true - yes, false - no)",
     )
-    Internet: fields.Boolean = fields.Boolean(
+    internet: fields.Boolean = fields.Boolean(
         title="Internet", description="Internet access at home (true - yes, false - no)"
     )
-    Romantic: fields.Boolean = fields.Boolean(
+    romantic: fields.Boolean = fields.Boolean(
         title="Romantic",
         description="With a romantic relationship (true - yes, false - no)",
     )

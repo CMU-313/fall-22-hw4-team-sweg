@@ -1,9 +1,33 @@
+from dataclasses import asdict
 from pathlib import Path
 from typing import List, Optional, Tuple
 
 import pandas as pd
+from sklearn.preprocessing import OrdinalEncoder, OneHotEncoder
 
 from app.dtos import Applicant, ModelMetadata, PredictionResult, TrainResult
+
+category_columns = [
+    "school",
+    "sex",
+    "address",
+    "family_size",
+    "p_status",
+    "mother_edu",
+    "father_edu",
+    "mother_job",
+    "father_job",
+    "reason",
+    "guardian",
+    "school_support",
+    "family_support",
+    "paid",
+    "activities",
+    "nursery",
+    "higher",
+    "internet",
+    "romantic",
+]
 
 score_funcs = {
     "linear": ["f_regression", "mutual_info_regression"],
@@ -13,7 +37,7 @@ score_funcs = {
 
 class ModelService:
     @staticmethod
-    def get_model(model_id: int) -> Optional[ModelMetadata]:
+    def get_model(model_id: str) -> Optional[ModelMetadata]:
         return ModelMetadata(
             model_class="logistic",
             score_func="f_classif",
@@ -48,8 +72,23 @@ class ModelService:
         return TrainResult(model_id=1, train_acc=0.5, valid_acc=0.5)
 
     @staticmethod
-    def predict(model_id: int, applicant: Applicant) -> PredictionResult:
-        # TODO (kyungmin): Implement this function
+    def predict(model_id: str, model_metadata: ModelMetadata, applicant: Applicant) -> PredictionResult:
+        data_dir = Path().cwd().parent.joinpath("data")
+        with open(data_dir.joinpath(f"ranked-features-{model_metadata.score_func}.txt")) as f:
+            features = [line.strip() for line in f.readlines()][:model_metadata.num_features]
+
+        df = pd.DataFrame.from_dict(asdict(applicant))
+        oe = OrdinalEncoder()
+        ohe = OneHotEncoder(drop="if_binary", sparse=False)
+        one_hot_df = pd.DataFrame(
+            data=ohe.fit_transform(oe.fit_transform(df[category_columns])),
+            columns=ohe.get_feature_names_out(input_features=category_columns),
+        )
+        category_column_set = set(category_columns)
+        for column in df.columns:
+            if column not in category_column_set:
+                one_hot_df[column] = df[column]
+        print(one_hot_df)
         return PredictionResult(model_id=model_id, success=False)
 
     @staticmethod
