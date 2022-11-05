@@ -7,32 +7,30 @@ from sklearn.feature_selection import (chi2, f_classif, f_regression,
                                        mutual_info_regression)
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
 
+category_columns = [
+    "school",
+    "sex",
+    "address",
+    "family_size",
+    "p_status",
+    "mother_edu",
+    "father_edu",
+    "mother_job",
+    "father_job",
+    "reason",
+    "guardian",
+    "school_support",
+    "family_support",
+    "paid",
+    "activities",
+    "nursery",
+    "higher",
+    "internet",
+    "romantic",
+]
 
-def preprocess() -> None:
-    print("Preprocessing the dataset...", end="")
-    df = pd.read_csv("student-mat.csv", sep=";")
 
-    category_columns = [
-        "school",
-        "sex",
-        "address",
-        "family_size",
-        "p_status",
-        "mother_edu",
-        "father_edu",
-        "mother_job",
-        "father_job",
-        "reason",
-        "guardian",
-        "school_support",
-        "family_support",
-        "paid",
-        "activities",
-        "nursery",
-        "higher",
-        "internet",
-        "romantic",
-    ]
+def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     oe = OrdinalEncoder()
     ohe = OneHotEncoder(drop="if_binary", sparse=False)
     one_hot_df = pd.DataFrame(
@@ -43,8 +41,7 @@ def preprocess() -> None:
     for column in df.columns:
         if column not in category_column_set:
             one_hot_df[column] = df[column]
-    one_hot_df.to_csv(path_or_buf="student-mat-preprocessed.csv", sep=";", index=False)
-    print("DONE!")
+    return one_hot_df
 
 
 def rank_features():
@@ -68,5 +65,7 @@ def rank_features():
 
 
 if __name__ == "__main__":
-    preprocess()
+    df = pd.read_csv("student-mat.csv", sep=";")
+    df = preprocess(df)
+    df.to_csv(path_or_buf="student-mat-preprocessed.csv", sep=";", index=False)
     rank_features()

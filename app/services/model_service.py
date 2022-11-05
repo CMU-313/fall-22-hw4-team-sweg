@@ -2,37 +2,18 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import List, Optional, Tuple
 
+import joblib
 import pandas as pd
-from sklearn.preprocessing import OrdinalEncoder, OneHotEncoder
 
 from app.dtos import Applicant, ModelMetadata, PredictionResult, TrainResult
-
-category_columns = [
-    "school",
-    "sex",
-    "address",
-    "family_size",
-    "p_status",
-    "mother_edu",
-    "father_edu",
-    "mother_job",
-    "father_job",
-    "reason",
-    "guardian",
-    "school_support",
-    "family_support",
-    "paid",
-    "activities",
-    "nursery",
-    "higher",
-    "internet",
-    "romantic",
-]
+from data.preprocessor import preprocess
 
 score_funcs = {
     "linear": ["f_regression", "mutual_info_regression"],
     "logistic": ["f_classif", "mutual_info_classif", "chi2"],
 }
+
+data_dir = Path().cwd().parent.joinpath("data")
 
 
 class ModelService:
@@ -54,7 +35,7 @@ class ModelService:
         return []
 
     @staticmethod
-    def delete(model_id: int) -> None:
+    def delete(model_id: str) -> None:
         # TODO (victor): Implement this function
         return None
 
@@ -72,29 +53,28 @@ class ModelService:
         return TrainResult(model_id=1, train_acc=0.5, valid_acc=0.5)
 
     @staticmethod
-    def predict(model_id: str, model_metadata: ModelMetadata, applicant: Applicant) -> PredictionResult:
-        data_dir = Path().cwd().parent.joinpath("data")
-        with open(data_dir.joinpath(f"ranked-features-{model_metadata.score_func}.txt")) as f:
-            features = [line.strip() for line in f.readlines()][:model_metadata.num_features]
-
+    def predict(
+        model_id: str, model_metadata: ModelMetadata, applicant: Applicant
+    ) -> PredictionResult:
         df = pd.DataFrame.from_dict(asdict(applicant))
-        oe = OrdinalEncoder()
-        ohe = OneHotEncoder(drop="if_binary", sparse=False)
-        one_hot_df = pd.DataFrame(
-            data=ohe.fit_transform(oe.fit_transform(df[category_columns])),
-            columns=ohe.get_feature_names_out(input_features=category_columns),
+        X, _ = ModelService._prepare_dataset(
+            model_metadata.model_class,
+            model_metadata.score_func,
+            model_metadata.num_features,
+            df=preprocess(df),
         )
-        category_column_set = set(category_columns)
-        for column in df.columns:
-            if column not in category_column_set:
-                one_hot_df[column] = df[column]
-        print(one_hot_df)
-        return PredictionResult(model_id=model_id, success=False)
+        model = joblib.load(data_dir.joinpath(f"models/model/model_{model_id}.pkl"))
+        out = model.predict(X)[0]
+        if model_metadata.model_class == "linear":
+            out = out >= 15.0
+        elif model_metadata.model_class == "logistic":
+            out = bool(out)
+        return PredictionResult(model_id=model_id, success=out)
 
     @staticmethod
     def _prepare_dataset(
-        model_class: str, score_func: str, k: int
-    ) -> Tuple[pd.DataFrame, pd.Series]:
+        model_class: str, score_func: str, k: int, df: Optional[pd.DataFrame] = None
+    ) -> Tuple[pd.DataFrame, Optional[pd.Series]]:
         if model_class not in score_funcs.keys():
             raise ValueError(f"Unsupported model class: {model_class}")
         if score_func not in score_funcs[model_class]:
@@ -106,8 +86,11 @@ class ModelService:
         with open(data_dir.joinpath(f"ranked-features-{score_func}.txt")) as f:
             features = [line.strip() for line in f.readlines()][:k]
 
-        df = pd.read_csv(data_dir.joinpath("student-mat-preprocessed.csv"), sep=";")
+        if not df:
+            df = pd.read_csv(data_dir.joinpath("student-mat-preprocessed.csv"), sep=";")
         X, y = df.loc[:, df.columns.isin(features)], None
+        if "G3" not in df.columns:
+            return X, y
         if model_class == "linear":
             y = df["G3"]
         elif model_class == "logistic":
