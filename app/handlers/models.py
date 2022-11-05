@@ -38,6 +38,7 @@ class ModelList(Resource):
                     score_func="f_classif",
                     num_features=10,
                     learning_rate=0.5,
+                    k=5,
                 )
             ),
             201,
