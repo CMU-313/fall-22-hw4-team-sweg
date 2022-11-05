@@ -6,6 +6,7 @@ import joblib
 import pandas as pd
 
 from app.dtos import Applicant, ModelMetadata, PredictionResult, TrainResult
+from data.preprocessor import preprocess
 
 score_funcs = {
     "linear": ["f_regression", "mutual_info_regression"],
@@ -55,14 +56,12 @@ class ModelService:
     def predict(
         model_id: str, model_metadata: ModelMetadata, applicant: Applicant
     ) -> PredictionResult:
-        oe = joblib.load(data_dir.joinpath("ordinal-encoder.pkl"))
-        ohe = joblib.load(data_dir.joinpath("one-hot-encoder.pkl"))
-        df = ohe.transform(oe.transform(pd.DataFrame.from_dict(asdict(applicant))))
+        df = pd.DataFrame(asdict(applicant), index=[0])
         X, _ = ModelService._prepare_dataset(
             model_metadata.model_class,
             model_metadata.score_func,
             model_metadata.num_features,
-            df=df,
+            df=preprocess(df, predict=True),
         )
         model = joblib.load(data_dir.joinpath(f"models/model/model_{model_id}.pkl"))
         out = model.predict(X)[0]
@@ -83,11 +82,10 @@ class ModelService:
                 f"{model_class} model should use one of: {score_funcs[model_class]}"
             )
 
-        data_dir = Path().cwd().parent.joinpath("data")
         with open(data_dir.joinpath(f"ranked-features-{score_func}.txt")) as f:
             features = [line.strip() for line in f.readlines()][:k]
 
-        if not df:
+        if df is None:
             df = pd.read_csv(data_dir.joinpath("student-mat-preprocessed.csv"), sep=";")
         X, y = df.loc[:, df.columns.isin(features)], None
         if "G3" not in df.columns:

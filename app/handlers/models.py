@@ -1,12 +1,19 @@
 import uuid
-from dataclasses import asdict
+from dataclasses import asdict, fields
 from typing import List, Tuple
 
-from flask_restx import Namespace, Resource
+from flask_restx import Namespace, Resource, reqparse
 
-from app.dtos import (Applicant, ApplicantFields, ModelMetadata,
-                      ModelMetadataFields, PredictionResult,
-                      PredictionResultFields, TrainResult, TrainResultFields)
+from app.dtos import (
+    Applicant,
+    ApplicantFields,
+    ModelMetadata,
+    ModelMetadataFields,
+    PredictionResult,
+    PredictionResultFields,
+    TrainResult,
+    TrainResultFields,
+)
 from app.services import ModelService
 
 api = Namespace(
@@ -56,7 +63,7 @@ class Model(Resource):
     def get(self, model_id: str) -> Tuple[ModelMetadata, int]:
         """Gets a model with a given ID"""
         try:
-            uuid_obj = uuid.UUID(model_id, version=4)
+            uuid.UUID(model_id, version=4)
         except ValueError:
             api.abort(400, "Invalid model ID")
         if not ModelService.get_model(model_id):
@@ -69,7 +76,7 @@ class Model(Resource):
     def delete(self, model_id: str) -> Tuple[str, int]:
         """Deletes a model with a given ID"""
         try:
-            uuid_obj = uuid.UUID(model_id, version=4)
+            uuid.UUID(model_id, version=4)
         except ValueError:
             api.abort(400, "Invalid model ID")
         if not ModelService.get_model(model_id):
@@ -88,10 +95,15 @@ class ModelPrediction(Resource):
     def post(self, model_id: str) -> Tuple[PredictionResult, int]:
         """Predicts the success of an applicant using a given model"""
         try:
-            uuid_obj = uuid.UUID(model_id, version=4)
+            uuid.UUID(model_id, version=4)
         except ValueError:
             api.abort(400, "Invalid model ID")
         model_metadata = ModelService.get_model(model_id)
         if not model_metadata:
             api.abort(404, "Model does not exist")
-        return ModelService.predict(model_id, model_metadata, Applicant()), 200
+
+        parser = reqparse.RequestParser()
+        for field in fields(Applicant):
+            parser.add_argument(field.name, type=field.type, location="json")
+        args = parser.parse_args()
+        return ModelService.predict(model_id, model_metadata, Applicant(**args)), 200

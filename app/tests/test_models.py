@@ -1,7 +1,7 @@
 import random
 import uuid
 from dataclasses import asdict
-from typing import Generator, List
+from typing import Any, Dict, Generator, List
 from unittest.mock import patch
 
 import pytest
@@ -18,6 +18,41 @@ class TestModels:
     def client(self) -> Generator[FlaskClient, None, None]:
         with app.test_client() as client:
             yield client
+
+    @pytest.fixture
+    def applicant(self) -> Dict[str, Any]:
+        return {
+            "school": "GP",
+            "sex": "F",
+            "age": 22,
+            "address": "U",
+            "family_size": "LE3",
+            "p_status": "T",
+            "mother_edu": 4,
+            "father_edu": 4,
+            "mother_job": "teacher",
+            "father_job": "teacher",
+            "reason": "home",
+            "guardian": "mother",
+            "travel_time": 4,
+            "study_time": 4,
+            "failures": 4,
+            "school_support": "yes",
+            "family_support": "yes",
+            "paid": "yes",
+            "activities": "yes",
+            "nursery": "yes",
+            "higher": "yes",
+            "internet": "yes",
+            "romantic": "yes",
+            "family_rel": 5,
+            "free_time": 5,
+            "going_out": 5,
+            "workday_alcohol": 5,
+            "weekend_alcohol": 5,
+            "health": 5,
+            "absences": 93,
+        }
 
     @pytest.fixture
     def three_models(self) -> List[ModelMetadata]:
@@ -175,7 +210,7 @@ class TestModels:
             resp = client.delete(url.format(model_id))
             assert resp.status_code == 204
 
-    def test_predict(self, client: FlaskClient) -> None:
+    def test_predict(self, client: FlaskClient, applicant) -> None:
         url = "/api/models/{}/predict"
 
         # Model ID must be an UUID
@@ -183,16 +218,10 @@ class TestModels:
         assert resp.status_code == 400
 
         # Age must be between 15 and 22
-        resp = client.post(url.format(1), json={"age": 40, "family_size": "LE3"})
+        applicant["age"] = 40
+        resp = client.post(url.format(1), json=applicant)
         assert resp.status_code == 400
-
-        applicant = {
-            "school": "GP",
-            "sex": "M",
-            "age": 20,
-            "family_size": "LE3",
-            "absences": 50,
-        }
+        applicant["age"] = 22
 
         # Model must exist
         model_id = str(uuid.uuid4())

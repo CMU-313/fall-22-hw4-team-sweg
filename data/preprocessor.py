@@ -1,11 +1,16 @@
+from pathlib import Path
 from typing import Callable
 
 import joblib
 import numpy as np
 import pandas as pd
-from sklearn.feature_selection import (chi2, f_classif, f_regression,
-                                       mutual_info_classif,
-                                       mutual_info_regression)
+from sklearn.feature_selection import (
+    chi2,
+    f_classif,
+    f_regression,
+    mutual_info_classif,
+    mutual_info_regression,
+)
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
 
 category_columns = [
@@ -31,15 +36,23 @@ category_columns = [
 ]
 
 
-def preprocess(df: pd.DataFrame) -> pd.DataFrame:
-    oe = OrdinalEncoder()
-    oe.fit(df[category_columns])
-    joblib.dump(oe, "ordinal-encoder.pkl")
+def preprocess(df: pd.DataFrame, predict: bool = False) -> pd.DataFrame:
+    oe_path = Path(__file__).parent.joinpath("ordinal-encoder.pkl")
+    if predict:
+        oe = joblib.load(oe_path)
+    else:
+        oe = OrdinalEncoder()
+        oe.fit(df[category_columns])
+        joblib.dump(oe, oe_path)
     ordinal_df = oe.transform(df[category_columns])
 
-    ohe = OneHotEncoder(drop="if_binary", sparse=False)
-    ohe.fit(ordinal_df)
-    joblib.dump(ohe, "one-hot-encoder.pkl")
+    ohe_path = Path(__file__).parent.joinpath("one-hot-encoder.pkl")
+    if predict:
+        ohe = joblib.load(ohe_path)
+    else:
+        ohe = OneHotEncoder(drop="if_binary", sparse=False)
+        ohe.fit(ordinal_df)
+        joblib.dump(ohe, ohe_path)
     one_hot_df = pd.DataFrame(
         data=ohe.transform(ordinal_df),
         columns=ohe.get_feature_names_out(input_features=category_columns),
