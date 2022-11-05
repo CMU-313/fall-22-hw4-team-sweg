@@ -6,7 +6,6 @@ import joblib
 import pandas as pd
 
 from app.dtos import Applicant, ModelMetadata, PredictionResult, TrainResult
-from data.preprocessor import preprocess
 
 score_funcs = {
     "linear": ["f_regression", "mutual_info_regression"],
@@ -56,12 +55,14 @@ class ModelService:
     def predict(
         model_id: str, model_metadata: ModelMetadata, applicant: Applicant
     ) -> PredictionResult:
-        df = pd.DataFrame.from_dict(asdict(applicant))
+        oe = joblib.load(data_dir.joinpath("ordinal-encoder.pkl"))
+        ohe = joblib.load(data_dir.joinpath("one-hot-encoder.pkl"))
+        df = ohe.transform(oe.transform(pd.DataFrame.from_dict(asdict(applicant))))
         X, _ = ModelService._prepare_dataset(
             model_metadata.model_class,
             model_metadata.score_func,
             model_metadata.num_features,
-            df=preprocess(df),
+            df=df,
         )
         model = joblib.load(data_dir.joinpath(f"models/model/model_{model_id}.pkl"))
         out = model.predict(X)[0]

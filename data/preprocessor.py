@@ -1,5 +1,6 @@
 from typing import Callable
 
+import joblib
 import numpy as np
 import pandas as pd
 from sklearn.feature_selection import (chi2, f_classif, f_regression,
@@ -32,9 +33,15 @@ category_columns = [
 
 def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     oe = OrdinalEncoder()
+    oe.fit(df[category_columns])
+    joblib.dump(oe, "ordinal-encoder.pkl")
+    ordinal_df = oe.transform(df[category_columns])
+
     ohe = OneHotEncoder(drop="if_binary", sparse=False)
+    ohe.fit(ordinal_df)
+    joblib.dump(ohe, "one-hot-encoder.pkl")
     one_hot_df = pd.DataFrame(
-        data=ohe.fit_transform(oe.fit_transform(df[category_columns])),
+        data=ohe.transform(ordinal_df),
         columns=ohe.get_feature_names_out(input_features=category_columns),
     )
     category_column_set = set(category_columns)

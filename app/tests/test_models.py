@@ -1,4 +1,5 @@
 import random
+import uuid
 from dataclasses import asdict
 from typing import Generator, List
 from unittest.mock import patch
@@ -57,10 +58,11 @@ class TestModels:
         url = "/api/models"
 
         # Returns desired data
+        model_id = str(uuid.uuid4())
         with patch.object(
             ModelService,
             "train",
-            return_value=TrainResult(model_id=1, train_acc=0.5, valid_acc=0.5),
+            return_value=TrainResult(model_id=model_id, train_acc=0.5, valid_acc=0.5),
         ):
             resp = client.post(
                 url,
@@ -74,14 +76,15 @@ class TestModels:
             )
             data = resp.get_json()
             assert resp.status_code == 201
-            assert data["model_id"] == 1
+            assert data["model_id"] == model_id
             assert 0 <= data["train_acc"] <= 1
             assert 0 <= data["valid_acc"] <= 1
 
+        model_id = str(uuid.uuid4())
         with patch.object(
             ModelService,
             "train",
-            return_value=TrainResult(model_id=2, train_acc=0.5, valid_acc=0.5),
+            return_value=TrainResult(model_id=model_id, train_acc=0.5, valid_acc=0.5),
         ):
             resp = client.post(
                 url,
@@ -95,7 +98,7 @@ class TestModels:
             )
             data = resp.get_json()
             assert resp.status_code == 201
-            assert data["model_id"] == 2
+            assert data["model_id"] == model_id
             assert 0 <= data["train_acc"] <= 1
             assert 0 <= data["valid_acc"] <= 1
 
@@ -114,17 +117,14 @@ class TestModels:
     def test_get_model(self, client: FlaskClient) -> None:
         url = "/api/models/{}"
 
-        # Model ID must be a number
+        # Model ID must be an UUID
         resp = client.get(url.format("abcd"))
-        assert resp.status_code == 404
-
-        # Model ID must be positive
-        resp = client.get(url.format(0))
         assert resp.status_code == 400
 
         # Model must exist
+        model_id = str(uuid.uuid4())
         with patch.object(ModelService, "get_model", return_value=None):
-            resp = client.get(url.format(1))
+            resp = client.get(url.format(model_id))
             assert resp.status_code == 404
 
         # Returns desired data
@@ -139,7 +139,7 @@ class TestModels:
                 k=2,
             ),
         ):
-            resp = client.get(url.format(1))
+            resp = client.get(url.format(model_id))
             data = resp.get_json()
             assert resp.status_code == 200
             assert data["model_class"] == "linear"
@@ -151,17 +151,14 @@ class TestModels:
     def test_delete_model(self, client: FlaskClient) -> None:
         url = "/api/models/{}"
 
-        # Model ID must be an integer
-        resp = client.delete(url.format("testinginput"))
-        assert resp.status_code == 404
-
-        # Model ID must be positive
-        resp = client.delete(url.format(0))
+        # Model ID must be an UUID
+        resp = client.get(url.format("abcd"))
         assert resp.status_code == 400
 
         # Model must exist to be deleted
+        model_id = str(uuid.uuid4())
         with patch.object(ModelService, "get_model", return_value=None):
-            resp = client.delete(url.format(1))
+            resp = client.delete(url.format(model_id))
             assert resp.status_code == 404
 
         # Successful deletion should return 204
@@ -175,56 +172,54 @@ class TestModels:
                 learning_rate=0.5,
             ),
         ):
-            resp = client.delete(url.format(1))
+            resp = client.delete(url.format(model_id))
             assert resp.status_code == 204
 
     def test_predict(self, client: FlaskClient) -> None:
         url = "/api/models/{}/predict"
 
-        # Model ID must be an integer
+        # Model ID must be an UUID
         resp = client.post(url.format("abcd"))
-        assert resp.status_code == 404
-
-        # Model ID must be positive
-        resp = client.post(url.format(0))
         assert resp.status_code == 400
 
         # Age must be between 15 and 22
-        resp = client.post(url.format(1), json={"age": 40, "family_size": True})
+        resp = client.post(url.format(1), json={"age": 40, "family_size": "LE3"})
         assert resp.status_code == 400
 
         applicant = {
-            "school": True,
-            "sex": False,
+            "school": "GP",
+            "sex": "M",
             "age": 20,
-            "family_size": True,
+            "family_size": "LE3",
             "absences": 50,
         }
 
         # Model must exist
+        model_id = str(uuid.uuid4())
         with patch.object(ModelService, "get_model", return_value=None):
-            resp = client.post(url.format(1), json=applicant)
+            resp = client.post(url.format(model_id), json=applicant)
             assert resp.status_code == 404
 
         # Returns desired data
         with patch.object(
             ModelService,
             "predict",
-            return_value=PredictionResult(model_id=1, success=True),
+            return_value=PredictionResult(model_id=model_id, success=True),
         ):
-            resp = client.post(url.format(1), json=applicant)
+            resp = client.post(url.format(model_id), json=applicant)
             data = resp.get_json()
             assert resp.status_code == 200
-            assert data["model_id"] == 1
+            assert data["model_id"] == model_id
             assert data["success"]
 
+        model_id = str(uuid.uuid4())
         with patch.object(
             ModelService,
             "predict",
-            return_value=PredictionResult(model_id=2, success=False),
+            return_value=PredictionResult(model_id=model_id, success=False),
         ):
-            resp = client.post(url.format(2), json=applicant)
+            resp = client.post(url.format(model_id), json=applicant)
             data = resp.get_json()
             assert resp.status_code == 200
-            assert data["model_id"] == 2
+            assert data["model_id"] == model_id
             assert not data["success"]
