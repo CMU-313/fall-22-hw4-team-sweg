@@ -9,6 +9,7 @@ from flask.testing import FlaskClient
 from app.app import app
 from app.dtos import ModelMetadata, PredictionResult, TrainResult
 from app.services import ModelService
+from app.services.model_service import score_funcs
 
 
 class TestModels:
@@ -19,15 +20,19 @@ class TestModels:
 
     @pytest.fixture
     def three_models(self) -> List[ModelMetadata]:
-        return [
-            ModelMetadata(
-                model_class=random.choice(["logistic", "linear"]),
-                num_features=10,
-                learning_rate=random.random(),
-                k=random.randint(1, 10) if i % 2 else None,
+        models = []
+        for i in range(3):
+            model_class = random.choice(["logistic", "linear"])
+            models.append(
+                ModelMetadata(
+                    model_class=model_class,
+                    score_func=random.choice(score_funcs[model_class]),
+                    num_features=10,
+                    learning_rate=random.random(),
+                    k=random.randint(1, 10) if i % 2 else None,
+                )
             )
-            for i in range(3)
-        ]
+        return models
 
     def test_get_model_list(self, client: FlaskClient, three_models) -> None:
         url = "/api/models"
@@ -61,6 +66,7 @@ class TestModels:
                 url,
                 json={
                     "model_class": "logistic",
+                    "score_func": "f_classif",
                     "num_features": 10,
                     "learning_rate": 0.5,
                     "k": 2,
@@ -81,6 +87,7 @@ class TestModels:
                 url,
                 json={
                     "model_class": "linear",
+                    "score_func": "f_regression",
                     "num_features": 10,
                     "learning_rate": 2.5,
                     "k": 10,
@@ -97,6 +104,7 @@ class TestModels:
             url,
             json={
                 "model_class": "RandomForest",
+                "score_func": "SelectFpr",
                 "learning_rate": -0.1,
                 "k": -1,
             },
@@ -124,13 +132,18 @@ class TestModels:
             ModelService,
             "get_model",
             return_value=ModelMetadata(
-                model_class="linear", num_features=10, learning_rate=0.5, k=2
+                model_class="linear",
+                score_func="f_regression",
+                num_features=10,
+                learning_rate=0.5,
+                k=2,
             ),
         ):
             resp = client.get(url.format(1))
             data = resp.get_json()
             assert resp.status_code == 200
             assert data["model_class"] == "linear"
+            assert data["score_func"] == "f_regression"
             assert data["num_features"] == 10
             assert 0 <= data["learning_rate"] <= 1
             assert data["k"] == 2
@@ -156,7 +169,10 @@ class TestModels:
             ModelService,
             "get_model",
             return_value=ModelMetadata(
-                model_class="logistic", num_features=10, learning_rate=0.5
+                model_class="logistic",
+                score_func="f_classif",
+                num_features=10,
+                learning_rate=0.5,
             ),
         ):
             resp = client.delete(url.format(1))

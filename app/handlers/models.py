@@ -34,7 +34,10 @@ class ModelList(Resource):
         return (
             ModelService.train(
                 ModelMetadata(
-                    model_class="logistic", num_features=10, learning_rate=0.5
+                    model_class="logistic",
+                    score_func="f_classif",
+                    num_features=10,
+                    learning_rate=0.5,
                 )
             ),
             201,

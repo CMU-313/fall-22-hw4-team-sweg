@@ -2,16 +2,24 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 import pandas as pd
-from sklearn.feature_selection import SelectKBest, f_classif, f_regression
 
 from app.dtos import Applicant, ModelMetadata, PredictionResult, TrainResult
+
+score_funcs = {
+    "linear": ["f_regression", "mutual_info_regression"],
+    "logistic": ["f_classif", "mutual_info_classif", "chi2"],
+}
 
 
 class ModelService:
     @staticmethod
     def get_model(model_id: int) -> Optional[ModelMetadata]:
         return ModelMetadata(
-            model_class="logistic", num_features=10, learning_rate=0.1, k=2
+            model_class="logistic",
+            score_func="f_classif",
+            num_features=10,
+            learning_rate=0.1,
+            k=2,
         )
 
     @staticmethod
@@ -28,8 +36,10 @@ class ModelService:
 
     @staticmethod
     def train(model_metadata: ModelMetadata) -> TrainResult:
-        X, y = ModelService.select_features(
-            model_metadata.model_class, model_metadata.num_features
+        X, y = ModelService._prepare_dataset(
+            model_metadata.model_class,
+            model_metadata.score_func,
+            model_metadata.num_features,
         )
 
         # TODO (jaehoon): Split dataset and train a model
@@ -43,19 +53,24 @@ class ModelService:
         return PredictionResult(model_id=model_id, success=False)
 
     @staticmethod
-    def select_features(model_class: str, k: int) -> Tuple[pd.DataFrame, pd.Series]:
-        if model_class not in ["linear", "logistic"]:
+    def _prepare_dataset(
+        model_class: str, score_func: str, k: int
+    ) -> Tuple[pd.DataFrame, pd.Series]:
+        if model_class not in score_funcs.keys():
             raise ValueError(f"Unsupported model class: {model_class}")
+        if score_func not in score_funcs[model_class]:
+            raise ValueError(
+                f"{model_class} model should use one of: {score_funcs[model_class]}"
+            )
 
-        file_path = Path().cwd().parent.joinpath(f"data/student-mat-preprocessed.csv")
-        df = pd.read_csv(file_path, sep=";")
-        X, y = df.loc[:, ~df.columns.isin(["G1", "G2", "G3"])], None
-        score_func = None
+        data_dir = Path().cwd().parent.joinpath("data")
+        with open(data_dir.joinpath(f"ranked-features-{score_func}.txt")) as f:
+            features = [line.strip() for line in f.readlines()][:k]
+
+        df = pd.read_csv(data_dir.joinpath("student-mat-preprocessed.csv"), sep=";")
+        X, y = df.loc[:, df.columns.isin(features)], None
         if model_class == "linear":
             y = df["G3"]
-            score_func = f_regression
         elif model_class == "logistic":
             y = df["G3"] >= 15.0
-            score_func = f_classif
-        selector = SelectKBest(score_func=score_func, k=min(len(X.columns), k))
-        return pd.DataFrame(data=selector.fit_transform(X, y=y)), y
+        return X, y

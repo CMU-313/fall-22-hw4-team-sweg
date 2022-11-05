@@ -7,6 +7,7 @@ from flask_restx import fields
 @dataclass(frozen=True)
 class ModelMetadata:
     model_class: str
+    score_func: str
     num_features: int
     learning_rate: float
     k: Optional[int] = None
@@ -18,6 +19,18 @@ class ModelMetadataFields:
         title="Model class",
         description="The name of the model class",
         enum=["logistic", "linear"],
+        required=True,
+    )
+    score_func: fields.String = fields.String(
+        title="Score function",
+        description="The score function to use to select features",
+        enum=[
+            "f_regression",
+            "mutual_info_regression",
+            "f_classif",
+            "mutual_info_classif",
+            "chi2",
+        ],
         required=True,
     )
     num_features: fields.Integer = fields.Integer(
