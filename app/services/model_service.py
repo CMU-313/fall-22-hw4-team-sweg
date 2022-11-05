@@ -82,7 +82,7 @@ class ModelService:
                 f"{model_class} model should use one of: {score_funcs[model_class]}"
             )
 
-        with open(data_dir.joinpath(f"ranked-features-{score_func}.txt")) as f:
+        with open(data_dir.joinpath(f"features/ranked-features-{score_func}.txt")) as f:
             features = [line.strip() for line in f.readlines()][:k]
 
         if df is None:
