@@ -4,13 +4,9 @@ from typing import Callable
 import joblib
 import numpy as np
 import pandas as pd
-from sklearn.feature_selection import (
-    chi2,
-    f_classif,
-    f_regression,
-    mutual_info_classif,
-    mutual_info_regression,
-)
+from sklearn.feature_selection import (chi2, f_classif, f_regression,
+                                       mutual_info_classif,
+                                       mutual_info_regression)
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
 
 category_columns = [
@@ -37,7 +33,7 @@ category_columns = [
 
 
 def preprocess(df: pd.DataFrame, predict: bool = False) -> pd.DataFrame:
-    oe_path = Path(__file__).parent.joinpath("ordinal-encoder.pkl")
+    oe_path = Path(__file__).parent.joinpath("encoders/ordinal-encoder.pkl")
     if predict:
         oe = joblib.load(oe_path)
     else:
@@ -46,7 +42,7 @@ def preprocess(df: pd.DataFrame, predict: bool = False) -> pd.DataFrame:
         joblib.dump(oe, oe_path)
     ordinal_df = oe.transform(df[category_columns])
 
-    ohe_path = Path(__file__).parent.joinpath("one-hot-encoder.pkl")
+    ohe_path = Path(__file__).parent.joinpath("encoders/one-hot-encoder.pkl")
     if predict:
         ohe = joblib.load(ohe_path)
     else:
@@ -74,7 +70,7 @@ def rank_features():
         if type(scores) == tuple:
             scores = scores[0]
         indices = np.argsort(scores)[::-1]
-        with open(f"ranked-features-{score_func.__name__}.txt", "w") as f:
+        with open(f"features/ranked-features-{score_func.__name__}.txt", "w") as f:
             for feature in X.columns[indices]:
                 f.write(f"{feature}\n")
 
@@ -85,7 +81,11 @@ def rank_features():
 
 
 if __name__ == "__main__":
+    print("Preprocessing the dataset...", end="")
     df = pd.read_csv("student-mat.csv", sep=";")
     df = preprocess(df)
     df.to_csv(path_or_buf="student-mat-preprocessed.csv", sep=";", index=False)
+    print("DONE!")
+    print("Ranking the features...", end="")
     rank_features()
+    print("DONE!")
