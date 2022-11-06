@@ -35,7 +35,6 @@ class ModelList(Resource):
         parser.add_argument('model_class', required=True, type=str)
         parser.add_argument('score_func', required=True, type=str)
         parser.add_argument('num_features', required=True, type=int)
-        parser.add_argument('learning_rate', required=True, type=int)
         parser.add_argument('k', required=True, type=int)
         args = parser.parse_args()
 
@@ -45,7 +44,6 @@ class ModelList(Resource):
                     model_class=args["model_class"],
                     score_func=args["score_func"],
                     num_features=args["num_features"],
-                    learning_rate=args["learning_rate"],
                     k=args["k"],
                 )
             ),

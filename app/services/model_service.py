@@ -18,6 +18,9 @@ score_funcs = {
     "logistic": ["f_classif", "mutual_info_classif", "chi2"],
 }
 
+model_file = Path().cwd().parent.joinpath("data")
+
+
 
 class ModelService:
     @staticmethod
@@ -26,7 +29,6 @@ class ModelService:
             model_class="logistic",
             score_func="f_classif",
             num_features=10,
-            learning_rate=0.1,
             k=2,
         )
 
@@ -102,13 +104,12 @@ class ModelService:
     
     @staticmethod
     def _save_model_metadata(model_id: str, model_metadata: ModelMetadata) -> None:
-        filepath = f"../data/models/model_metadata/{model_metadata.model_class}_{model_id}.txt"
+        model_dir = model_file.joinpath(f"models/{model_id}.txt")
 
-        with open(filepath,"w+") as f:
+        with open(model_dir,"w+") as f:
             f.write(f"Model Class : {model_metadata.model_class}\n")
             f.write(f"Score Function : {model_metadata.score_func}\n")
             f.write(f"Number of Features : {model_metadata.num_features}\n")
-            f.write(f"Learning Rate : {model_metadata.learning_rate}\n")
             f.write(f"K : {model_metadata.k}\n")
     
         f.close()
@@ -116,7 +117,7 @@ class ModelService:
 
     @staticmethod
     def _save_model(model_id: str, model: RegressorMixin) -> None:
-        filepath = f"../data/models/model/model_{model_id}.pkl"
+        model_dir = model_file.joinpath(f"models/{model_id}.pkl")
 
-        with open(filepath, 'w+'):
-            joblib.dump(model,filepath)
+        with open(model_dir, 'w+'):
+            joblib.dump(model,model_dir)
