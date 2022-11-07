@@ -64,7 +64,6 @@ class TestModels:
                     model_class=model_class,
                     score_func=random.choice(score_funcs[model_class]),
                     num_features=10,
-                    learning_rate=random.random(),
                     k=random.randint(1, 10) if i % 2 else None,
                 )
             )
@@ -105,7 +104,6 @@ class TestModels:
                     "model_class": "logistic",
                     "score_func": "f_classif",
                     "num_features": 10,
-                    "learning_rate": 0.5,
                     "k": 2,
                 },
             )
@@ -127,7 +125,6 @@ class TestModels:
                     "model_class": "linear",
                     "score_func": "f_regression",
                     "num_features": 10,
-                    "learning_rate": 2.5,
                     "k": 10,
                 },
             )
@@ -143,7 +140,6 @@ class TestModels:
             json={
                 "model_class": "RandomForest",
                 "score_func": "SelectFpr",
-                "learning_rate": -0.1,
                 "k": -1,
             },
         )
@@ -170,7 +166,6 @@ class TestModels:
                 model_class="linear",
                 score_func="f_regression",
                 num_features=10,
-                learning_rate=0.5,
                 k=2,
             ),
         ):
@@ -180,7 +175,6 @@ class TestModels:
             assert data["model_class"] == "linear"
             assert data["score_func"] == "f_regression"
             assert data["num_features"] == 10
-            assert 0 <= data["learning_rate"] <= 1
             assert data["k"] == 2
 
     def test_delete_model(self, client: FlaskClient) -> None:
@@ -204,7 +198,6 @@ class TestModels:
                 model_class="logistic",
                 score_func="f_classif",
                 num_features=10,
-                learning_rate=0.5,
             ),
         ):
             resp = client.delete(url.format(model_id))
