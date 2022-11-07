@@ -127,7 +127,12 @@ Then, the encoders are exported to [`data/encoders`](https://github.com/CMU-313/
 ### Feature Selection
 
 Features do not always contribute to a good model performance; some features would not show statistically significant relevance to the desired output, or too many features increase the model complexity and cause overfitting.
-Instead of using all the given features, we ranked them based on different score functions (regression – `f_regression`, `mutual_info_regression`, `classification` – `chi2`, `f_classif`, `mutual_info_classif`) and selected a subset of them to train a model.
+Instead of using all the given features, we ranked them based on different score functions:
+
+- regression – `f_regression`, `mutual_info_regression`
+- classification – `chi2`, `f_classif`, `mutual_info_classif`
+
+and selected a subset of them to train a model.
 The lists of ranked features can be found in [`data/features`](https://github.com/CMU-313/fall-22-hw4-team-swag/tree/main/data/features).
 
 We experimented to find an optimal combination of (model class, score function, number of features) that yields the best model. With 5-fold cross validation, the result is as follows:
@@ -136,4 +141,4 @@ We experimented to find an optimal combination of (model class, score function, 
 
 ![linear](./docs/linear.png)
 
-Our best model used a logistic regression with 12 features ranked by the `f_classif` function. The training accuracy was 83.54%, and the validation accuracy was 83.29%, much higher than the baseline model.
+Our best model used a logistic regression with 12 features ranked by the `f_classif` function. The training accuracy was **83.54%**, and the validation accuracy was **83.29%**, much higher than the baseline model.
