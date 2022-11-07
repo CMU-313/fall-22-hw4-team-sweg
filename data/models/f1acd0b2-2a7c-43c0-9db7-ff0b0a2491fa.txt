@@ -1,0 +1,6 @@
+Model Class:logistic
+Score Function:chi2
+Number of Features:25
+K:5
+Train Accuracy:0.8405063291139241
+Validation Accuracy:0.8050632911392406
