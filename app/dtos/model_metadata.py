@@ -9,7 +9,6 @@ class ModelMetadata:
     model_class: str
     score_func: str
     num_features: int
-    learning_rate: float
     k: Optional[int] = None
 
 
@@ -38,11 +37,6 @@ class ModelMetadataFields:
         description="The number of features to select for training",
         min=1,
         max=51,
-        required=True,
-    )
-    learning_rate: fields.Float = fields.Float(
-        title="Learning rate",
-        description="The learning rate to train a model with",
         required=True,
     )
     k: fields.Integer = fields.Integer(
