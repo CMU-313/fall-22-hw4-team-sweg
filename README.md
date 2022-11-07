@@ -1,4 +1,4 @@
-# HW4 Starter Code and Instructions
+# HW4 – Team SWEg
 
 Please consult the [homework assignment](https://cmu-313.github.io//assignments/hw4) for additional context and instructions for this code.
 
@@ -108,3 +108,32 @@ If you're not in the Pipenv shell, then execute the following command from the `
 ```terminal
 pipenv run pytest
 ```
+
+## Model Training
+
+### Preprocessing
+
+Since categorical variables do not have order nor represent magnitude, they cannot be entered into a model (especially regression) just as they are.
+Thus, we first decided to preprocess the dataset using `sklearn.preprocessing.OrdinalEncoder` and `sklearn.preprocessing.OneHotEncoder` and cached the fitted encoders so that they can be used again to transform a given applicant entity on inference.
+
+To run the preprocessing script, activate the Pipenv shell and execute the following command from the `data` directory:
+
+```terminal
+python preprocessor.py
+```
+
+Then, the encoders are exported to [`data/encoders`](https://github.com/CMU-313/fall-22-hw4-team-sweg/tree/main/data/encoders), and the preprocessed training dataset is saved as [`data/student-mat-preprocessed.csv`](https://github.com/CMU-313/fall-22-hw4-team-sweg/blob/main/data/student-mat-preprocessed.csv).
+
+### Feature Selection
+
+Features do not always contribute to a good model performance; some features would not show statistically significant relevance to the desired output, or too many features increase the model complexity and cause overfitting.
+Instead of using all the given features, we ranked them based on different score functions (regression – `f_regression`, `mutual_info_regression`, `classification` – `chi2`, `f_classif`, `mutual_info_classif`) and selected a subset of them to train a model.
+The lists of ranked features can be found in [`data/features`](https://github.com/CMU-313/fall-22-hw4-team-swag/tree/main/data/features).
+
+We experimented to find an optimal combination of (model class, score function, number of features) that yields the best model. With 5-fold cross validation, the result is as follows:
+
+![logistic](./docs/logistic.png)
+
+![linear](./docs/linear.png)
+
+Our best model used a logistic regression with 12 features ranked by the `f_classif` function. The training accuracy was 83.54%, and the validation accuracy was 83.29%, much higher than the baseline model.

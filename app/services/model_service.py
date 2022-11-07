@@ -62,7 +62,7 @@ class ModelService:
             train_predicted = model.predict(X)
             train_accuracy = r2_score(y, train_predicted)
         elif train_metadata.model_class == "logistic":
-            model = LogisticRegression(random_state=0).fit(X, y)
+            model = LogisticRegression(max_iter=1000).fit(X, y)
             train_predicted = model.predict(X)
             train_accuracy = accuracy_score(y, train_predicted)
 
