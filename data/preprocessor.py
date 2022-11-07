@@ -60,7 +60,7 @@ def preprocess(df: pd.DataFrame, predict: bool = False) -> pd.DataFrame:
     return one_hot_df
 
 
-def rank_features():
+def rank_features() -> None:
     df = pd.read_csv("student-mat-preprocessed.csv", sep=";")
     X, y = df.loc[:, ~df.columns.isin(["G1", "G2", "G3"])], df["G3"]
     y_labels = y >= 15.0

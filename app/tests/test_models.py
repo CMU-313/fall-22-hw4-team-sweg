@@ -61,10 +61,13 @@ class TestModels:
             model_class = random.choice(["logistic", "linear"])
             models.append(
                 ModelMetadata(
+                    model_id=str(uuid.uuid4()),
                     model_class=model_class,
                     score_func=random.choice(score_funcs[model_class]),
                     num_features=10,
-                    k=random.randint(1, 10) if i % 2 else None,
+                    k=random.randint(2, 10),
+                    train_acc=random.random(),
+                    valid_acc=random.random(),
                 )
             )
         return models
@@ -163,10 +166,13 @@ class TestModels:
             ModelService,
             "get_model",
             return_value=ModelMetadata(
+                model_id=model_id,
                 model_class="linear",
                 score_func="f_regression",
                 num_features=10,
                 k=2,
+                train_acc=0.5,
+                valid_acc=0.5,
             ),
         ):
             resp = client.get(url.format(model_id))
@@ -176,6 +182,8 @@ class TestModels:
             assert data["score_func"] == "f_regression"
             assert data["num_features"] == 10
             assert data["k"] == 2
+            assert 0 <= data["train_acc"] <= 1
+            assert 0 <= data["valid_acc"] <= 1
 
     def test_delete_model(self, client: FlaskClient) -> None:
         url = "/api/models/{}"
@@ -195,9 +203,13 @@ class TestModels:
             ModelService,
             "get_model",
             return_value=ModelMetadata(
+                model_id=model_id,
                 model_class="logistic",
                 score_func="f_classif",
                 num_features=10,
+                k=2,
+                train_acc=0.5,
+                valid_acc=0.5,
             ),
         ):
             resp = client.delete(url.format(model_id))

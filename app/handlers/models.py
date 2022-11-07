@@ -7,12 +7,16 @@ from flask_restx import Namespace, Resource, reqparse
 from app.dtos import (Applicant, ApplicantFields, ModelMetadata,
                       ModelMetadataFields, PredictionResult,
                       PredictionResultFields, TrainResult, TrainResultFields)
+from app.dtos.train import TrainMetadata, TrainMetadataFields
 from app.services import ModelService
 
 api = Namespace(
     name="models", description="API endpoints to manage machine learning models"
 )
 applicant_model = api.model(name="Applicant", model=asdict(ApplicantFields()))
+train_metadata_model = api.model(
+    name="TrainMetadata", model=asdict(TrainMetadataFields())
+)
 model_metadata_model = api.model(
     name="ModelMetadata", model=asdict(ModelMetadataFields())
 )
@@ -29,29 +33,32 @@ class ModelList(Resource):
         """Gets a list of all the models"""
         return ModelService.get_model_list(), 200
 
-    @api.expect(model_metadata_model)
+    @api.expect(train_metadata_model)
     @api.marshal_with(train_result_model, code=201)
     @api.response(400, "Invalid input")
     def post(self) -> Tuple[TrainResult, int]:
         """Creates and trains a model with given model class and hyperparameters"""
         parser = reqparse.RequestParser()
-        parser.add_argument('model_class', required=True, type=str)
-        parser.add_argument('score_func', required=True, type=str)
-        parser.add_argument('num_features', required=True, type=int)
-        parser.add_argument('k', required=True, type=int)
+        parser.add_argument("model_class", required=True, type=str)
+        parser.add_argument("score_func", required=True, type=str)
+        parser.add_argument("num_features", required=True, type=int)
+        parser.add_argument("k", required=True, type=int)
         args = parser.parse_args()
 
-        return (
-            ModelService.train(
-                ModelMetadata(
-                    model_class=args["model_class"],
-                    score_func=args["score_func"],
-                    num_features=args["num_features"],
-                    k=args["k"],
-                )
-            ),
-            201,
-        )
+        try:
+            return (
+                ModelService.train(
+                    TrainMetadata(
+                        model_class=args["model_class"],
+                        score_func=args["score_func"],
+                        num_features=args["num_features"],
+                        k=args["k"],
+                    )
+                ),
+                201,
+            )
+        except ValueError as e:
+            api.abort(400, str(e))
 
 
 @api.route("/<model_id>")
@@ -106,4 +113,10 @@ class ModelPrediction(Resource):
         for field in fields(Applicant):
             parser.add_argument(field.name, type=field.type, location="json")
         args = parser.parse_args()
-        return ModelService.predict(model_id, model_metadata, Applicant(**args)), 200
+        try:
+            return (
+                ModelService.predict(model_id, model_metadata, Applicant(**args)),
+                200,
+            )
+        except ValueError as e:
+            api.abort(400, str(e))

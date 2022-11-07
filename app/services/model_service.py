@@ -1,18 +1,18 @@
+import uuid
 from dataclasses import asdict
 from pathlib import Path
-from typing import List, Optional, Tuple
-from sklearn.base import RegressorMixin
-from sklearn.linear_model import LogisticRegression, LinearRegression
-from sklearn.metrics import accuracy_score, r2_score
-from sklearn.model_selection import cross_val_score
 from statistics import mean
-
+from typing import List, Optional, Tuple
 
 import joblib
 import pandas as pd
-import uuid
+from sklearn.base import RegressorMixin
+from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.metrics import accuracy_score, r2_score
+from sklearn.model_selection import cross_val_score
 
 from app.dtos import Applicant, ModelMetadata, PredictionResult, TrainResult
+from app.dtos.train import TrainMetadata
 from data.preprocessor import preprocess
 
 score_funcs = {
@@ -23,15 +23,17 @@ score_funcs = {
 data_dir = Path().cwd().parent.joinpath("data")
 
 
-
 class ModelService:
     @staticmethod
     def get_model(model_id: str) -> Optional[ModelMetadata]:
         return ModelMetadata(
+            model_id=model_id,
             model_class="logistic",
             score_func="f_classif",
             num_features=10,
             k=2,
+            train_acc=0.5,
+            valid_acc=0.5,
         )
 
     @staticmethod
@@ -47,34 +49,42 @@ class ModelService:
         return None
 
     @staticmethod
-    def train(model_metadata: ModelMetadata) -> TrainResult:
+    def train(train_metadata: TrainMetadata) -> TrainResult:
         X, y = ModelService._prepare_dataset(
-            model_metadata.model_class,
-            model_metadata.score_func,
-            model_metadata.num_features,
+            train_metadata.model_class,
+            train_metadata.score_func,
+            train_metadata.num_features,
         )
 
-        if model_metadata.model_class == "linear":
-            trained_model = LinearRegression().fit(X,y)
-            train_predicted = trained_model.predict(X)
+        model, train_accuracy = None, 0.0
+        if train_metadata.model_class == "linear":
+            model = LinearRegression().fit(X, y)
+            train_predicted = model.predict(X)
             train_accuracy = r2_score(y, train_predicted)
-
-        elif model_metadata.model_class == "logistic":
-            trained_model = LogisticRegression(random_state=0).fit(X,y)
-            train_predicted = trained_model.predict(X)
+        elif train_metadata.model_class == "logistic":
+            model = LogisticRegression(random_state=0).fit(X, y)
+            train_predicted = model.predict(X)
             train_accuracy = accuracy_score(y, train_predicted)
 
-        model_id = uuid.uuid4()
-        validation_accuracy = mean(cross_val_score(trained_model,X,y,cv=model_metadata.k))
+        model_id = str(uuid.uuid4())
+        validation_accuracy = mean(cross_val_score(model, X, y, cv=train_metadata.k))
 
-        ModelService._save_model(model_id, trained_model)
-        ModelService._save_model_metadata(model_id, model_metadata)
+        # Export the model
+        ModelService._save_model(model_id, model)
+        ModelService._save_model_metadata(
+            ModelMetadata(
+                **asdict(train_metadata),
+                model_id=model_id,
+                train_acc=train_accuracy,
+                valid_acc=validation_accuracy,
+            )
+        )
 
         return TrainResult(
             model_id=model_id,
             train_acc=train_accuracy,
             valid_acc=validation_accuracy,
-            )
+        )
 
     @staticmethod
     def predict(
@@ -87,7 +97,7 @@ class ModelService:
             model_metadata.num_features,
             df=preprocess(df, predict=True),
         )
-        model = joblib.load(data_dir.joinpath(f"models/model/model_{model_id}.pkl"))
+        model = joblib.load(data_dir.joinpath(f"models/{model_id}.pkl"))
         out = model.predict(X)[0]
         if model_metadata.model_class == "linear":
             out = out >= 15.0
@@ -119,23 +129,20 @@ class ModelService:
         elif model_class == "logistic":
             y = df["G3"] >= 15.0
         return X, y
-    
+
     @staticmethod
-    def _save_model_metadata(model_id: str, model_metadata: ModelMetadata) -> None:
-        model_dir = data_dir.joinpath(f"models/{model_id}.txt")
-
-        with open(model_dir,"w+") as f:
-            f.write(f"Model Class : {model_metadata.model_class}\n")
-            f.write(f"Score Function : {model_metadata.score_func}\n")
-            f.write(f"Number of Features : {model_metadata.num_features}\n")
-            f.write(f"K : {model_metadata.k}\n")
-    
-        f.close()
-
+    def _save_model_metadata(model_metadata: ModelMetadata) -> None:
+        model_dir = data_dir.joinpath(f"models/{model_metadata.model_id}.txt")
+        with open(model_dir, "w") as f:
+            f.write(f"Model Class:{model_metadata.model_class}\n")
+            f.write(f"Score Function:{model_metadata.score_func}\n")
+            f.write(f"Number of Features:{model_metadata.num_features}\n")
+            f.write(f"K:{model_metadata.k}\n")
+            f.write(f"Train Accuracy:{model_metadata.train_acc}\n")
+            f.write(f"Validation Accuracy:{model_metadata.valid_acc}\n")
 
     @staticmethod
     def _save_model(model_id: str, model: RegressorMixin) -> None:
         model_dir = data_dir.joinpath(f"models/{model_id}.pkl")
-
-        with open(model_dir, 'w+'):
-            joblib.dump(model,model_dir)
+        with open(model_dir, "w"):
+            joblib.dump(model, model_dir)
