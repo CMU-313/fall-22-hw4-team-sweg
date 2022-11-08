@@ -7,6 +7,7 @@ from typing import List, Optional, Tuple
 
 import joblib
 import pandas as pd
+import os
 from sklearn.base import RegressorMixin
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.metrics import accuracy_score, r2_score
@@ -49,7 +50,31 @@ class ModelService:
         # empty list so far, but should fetch the data from a
         # specific directory later, and parse out the data into
         # a list
-        return []
+        model_list = []
+        files = []
+        model_ids = []
+        filepath = data_dir.joinpath("models")
+        for file in os.listdir(filepath):
+            if file.endswith(".txt"):
+                files.append(os.path.join(filepath, file))
+                model_ids.append(file.replace(".txt", ""))
+        for i in range(len(files)):
+            # open txt file
+            f = open(files[i], "r")
+            data = f.readlines()
+            f.close()
+            
+            model_list.append(
+                ModelMetadata(
+                model_id=model_ids[i],
+                model_class=data[0].split(":")[1],
+                score_func=data[1].split(":")[1],
+                num_features=int(data[2].split(":")[1]),
+                k=int(data[3].split(":")[1]),
+                train_acc=float(data[4].split(":")[1]),
+                valid_acc=float(data[5].split(":")[1])))
+        
+        return model_list
 
     @staticmethod
     def delete(model_id: str) -> None:
