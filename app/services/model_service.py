@@ -1,3 +1,5 @@
+import shutil
+import os
 from typing import Optional
 
 from app.dtos import Applicant, ModelMetadata, TrainResult
@@ -21,5 +23,10 @@ class ModelService:
 
     @staticmethod
     def delete(model_id: int) -> None:
-        # TODO (victor): Implement this function
-        return None
+        # delete model and its related metadata
+        try:
+            model_dir = data_dir.joinpath(f"models/{model_metadata.model_id}.txt")
+            shutil.rmtree(model_dir) # delete metadata files related to model
+            os.remove(f"models/{model_id}.pkl") # delete model
+        except OSError as error:
+            return None
