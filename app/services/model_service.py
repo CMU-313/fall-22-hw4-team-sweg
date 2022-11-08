@@ -1,3 +1,4 @@
+import pickle
 import uuid
 from dataclasses import asdict
 from pathlib import Path
@@ -6,7 +7,6 @@ from typing import List, Optional, Tuple
 
 import joblib
 import pandas as pd
-import pickle
 from sklearn.base import RegressorMixin
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.metrics import accuracy_score, r2_score
@@ -28,9 +28,10 @@ class ModelService:
     @staticmethod
     def get_model(model_id: str) -> Optional[ModelMetadata]:
         try:
-            f = open(model_id + ".txt", "r")
+            f = open(f"{model_id}.txt", "r")
         except FileNotFoundError:
             return None
+
         data = f.readlines()
         f.close()
         return ModelMetadata(
