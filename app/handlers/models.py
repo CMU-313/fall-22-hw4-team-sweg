@@ -1,82 +1,136 @@
-from dataclasses import asdict
-from typing import Any, Dict, Tuple
+import uuid
+from dataclasses import asdict, fields
+from typing import List, Tuple
 
-from flask_restx import Namespace, Resource
+from flask_restx import Namespace, Resource, reqparse
 
-from app.dtos import (
-    ApplicantFields,
-    ModelMetadata,
-    ModelMetadataFields,
-    PredictionResultFields,
-    TrainResultFields,
-)
+from app.dtos import (Applicant, ApplicantFields, ModelMetadata,
+                      ModelMetadataFields, PredictionResult,
+                      PredictionResultFields, TrainResult, TrainResultFields)
+from app.dtos.train import TrainMetadata, TrainMetadataFields
 from app.services import ModelService
 
-api = Namespace(name="models", description="Models API")
-applicant = api.model(name="Applicant", model=asdict(ApplicantFields()))
-model_metadata = api.model(name="ModelMetadata",
-                           model=asdict(ModelMetadataFields()))
-train_result = api.model(name="TrainResult", model=asdict(TrainResultFields()))
-prediction_result = api.model(name="PredictionResult",
-                              model=asdict(PredictionResultFields()))
+api = Namespace(
+    name="models", description="API endpoints to manage machine learning models"
+)
+applicant_model = api.model(name="Applicant", model=asdict(ApplicantFields()))
+train_metadata_model = api.model(
+    name="TrainMetadata", model=asdict(TrainMetadataFields())
+)
+model_metadata_model = api.model(
+    name="ModelMetadata", model=asdict(ModelMetadataFields())
+)
+train_result_model = api.model(name="TrainResult", model=asdict(TrainResultFields()))
+prediction_result_model = api.model(
+    name="PredictionResult", model=asdict(PredictionResultFields())
+)
 
 
 @api.route("")
 class ModelList(Resource):
+    @api.marshal_with(model_metadata_model, as_list=True, code=200)
+    def get(self) -> Tuple[List[ModelMetadata], int]:
+        """Gets a list of all the models"""
+        return ModelService.get_model_list(), 200
 
-    def get(self) -> Dict[str, Any]:
-        # TODO (jihyo): Function Comment
-        return {}
-
-    @api.expect(model_metadata)
-    @api.marshal_with(train_result, code=201)
+    @api.expect(train_metadata_model)
+    @api.marshal_with(train_result_model, code=201)
     @api.response(400, "Invalid input")
-    def post(self) -> Tuple[Dict[str, Any], int]:
-        """Trains a model with the client specified model class and hyperparameters"""
-        return ModelService.train(
-            ModelMetadata(model_class="linear", learning_rate=0.5)), 201
+    def post(self) -> Tuple[TrainResult, int]:
+        """Creates and trains a model with given model class and hyperparameters"""
+        parser = reqparse.RequestParser()
+        parser.add_argument("model_class", required=True, type=str)
+        parser.add_argument("score_func", required=True, type=str)
+        parser.add_argument("num_features", required=True, type=int)
+        parser.add_argument("k", required=True, type=int)
+        args = parser.parse_args()
 
-@api.route("/<int:model_id>")
+        try:
+            return (
+                ModelService.train(
+                    TrainMetadata(
+                        model_class=args["model_class"],
+                        score_func=args["score_func"],
+                        num_features=args["num_features"],
+                        k=args["k"],
+                    )
+                ),
+                201,
+            )
+        except ValueError as e:
+            api.abort(400, str(e))
+
+
+@api.route("/<model_id>")
 @api.param("model_id", description="The model ID")
 class Model(Resource):
-    
-    @api.marshal_with(model_metadata, code=200)
+    @api.marshal_with(model_metadata_model, code=200)
     @api.response(400, "Invalid input")
     @api.response(404, "Model does not exist")
-    def get(self, model_id: int) -> Tuple[Dict[str, Any], int]:
-        if model_id <= 0:
+    def get(self, model_id: str) -> Tuple[ModelMetadata, int]:
+        """Gets a model with a given ID"""
+        try:
+            uuid.UUID(model_id, version=4)
+        except ValueError:
             api.abort(400, "Invalid model ID")
         if not ModelService.get_model(model_id):
             api.abort(404, "Model does not exist")
         return ModelService.get_model(model_id), 200
 
+<<<<<<< HEAD
     @api.response(400, "Invalid input")
     @api.response(404, "Model does not exist")
     def delete(self, model_id: int) -> '':
         '''Delete a model given its id'''
         if model_id <= 0:
+=======
+    @api.response(204, "Success")
+    @api.response(400, "Invalid input")
+    @api.response(404, "Model does not exist")
+    def delete(self, model_id: str) -> Tuple[str, int]:
+        """Deletes a model with a given ID"""
+        try:
+            uuid.UUID(model_id, version=4)
+        except ValueError:
+>>>>>>> origin
             api.abort(400, "Invalid model ID")
         if not ModelService.get_model(model_id):
             api.abort(404, "Model does not exist")
         ModelService.delete(model_id)
+<<<<<<< HEAD
         return '', 204
 
 @api.route("/<int:model_id>/predict")
+=======
+        return "", 204
+
+
+@api.route("/<model_id>/predict")
+>>>>>>> origin
 @api.param("model_id", description="The model ID")
 class ModelPrediction(Resource):
-
-    @api.expect(applicant)
-    @api.marshal_with(prediction_result, code=200)
+    @api.expect(applicant_model)
+    @api.marshal_with(prediction_result_model, code=200)
     @api.response(400, "Invalid input")
     @api.response(404, "Model does not exist")
-    def post(self, model_id: int) -> Tuple[Dict[str, Any], int]:
+    def post(self, model_id: str) -> Tuple[PredictionResult, int]:
         """Predicts the success of an applicant using a given model"""
-        if model_id <= 0:
+        try:
+            uuid.UUID(model_id, version=4)
+        except ValueError:
             api.abort(400, "Invalid model ID")
-        # TODO (kyungmin): Implement the endpoint
-        if not ModelService.get_model(model_id):
+        model_metadata = ModelService.get_model(model_id)
+        if not model_metadata:
             api.abort(404, "Model does not exist")
-        return {
-            "model_id": model_id,
-            "success": ModelService.predict(model_id, {}),
-        }, 200
+
+        parser = reqparse.RequestParser()
+        for field in fields(Applicant):
+            parser.add_argument(field.name, type=field.type, location="json")
+        args = parser.parse_args()
+        try:
+            return (
+                ModelService.predict(model_id, model_metadata, Applicant(**args)),
+                200,
+            )
+        except ValueError as e:
+            api.abort(400, str(e))

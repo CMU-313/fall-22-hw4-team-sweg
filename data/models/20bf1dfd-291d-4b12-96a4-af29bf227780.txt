@@ -1,0 +1,6 @@
+Model Class:logistic
+Score Function:f_classif
+Number of Features:12
+K:5
+Train Accuracy:0.8354430379746836
+Validation Accuracy:0.8329113924050633
