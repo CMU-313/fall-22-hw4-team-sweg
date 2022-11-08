@@ -30,8 +30,9 @@ class ModelService:
         try:
             f = open(model_id + ".txt", "r")
         except FileNotFoundError:
-            return
+            return None
         data = f.readlines()
+        f.close()
         return ModelMetadata(
             model_id=model_id,
             model_class=data[0].split(":")[1],
