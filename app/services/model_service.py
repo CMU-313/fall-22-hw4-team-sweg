@@ -1,3 +1,4 @@
+import pickle
 import uuid
 from dataclasses import asdict
 from pathlib import Path
@@ -26,14 +27,21 @@ data_dir = Path().cwd().parent.joinpath("data")
 class ModelService:
     @staticmethod
     def get_model(model_id: str) -> Optional[ModelMetadata]:
+        try:
+            f = open(f"{model_id}.txt", "r")
+        except FileNotFoundError:
+            return None
+
+        data = f.readlines()
+        f.close()
         return ModelMetadata(
             model_id=model_id,
-            model_class="logistic",
-            score_func="f_classif",
-            num_features=10,
-            k=2,
-            train_acc=0.5,
-            valid_acc=0.5,
+            model_class=data[0].split(":")[1],
+            score_func=data[1].split(":")[1],
+            num_features=int(data[2].split(":")[1]),
+            k=int(data[3].split(":")[1]),
+            train_acc=float(data[4].split(":")[1]),
+            valid_acc=float(data[5].split(":")[1]),
         )
 
     @staticmethod

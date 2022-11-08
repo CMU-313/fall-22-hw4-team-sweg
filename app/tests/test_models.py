@@ -235,25 +235,35 @@ class TestModels:
             assert resp.status_code == 404
 
         # Returns desired data
-        with patch.object(
-            ModelService,
-            "predict",
-            return_value=PredictionResult(model_id=model_id, success=True),
-        ):
-            resp = client.post(url.format(model_id), json=applicant)
+        model_metadata = ModelMetadata(
+            model_id=model_id,
+            train_acc=0.5,
+            valid_acc=0.5,
+            model_class="logistic",
+            score_func="f_classif",
+            num_features=25,
+            k=5,
+        )
+        with patch.object(ModelService, "get_model", return_value=model_metadata):
+            with patch.object(
+                ModelService,
+                "predict",
+                return_value=PredictionResult(model_id=model_id, success=True),
+            ):
+                resp = client.post(url.format(model_id), json=applicant)
             data = resp.get_json()
             assert resp.status_code == 200
             assert data["model_id"] == model_id
             assert data["success"]
 
-        model_id = str(uuid.uuid4())
-        with patch.object(
-            ModelService,
-            "predict",
-            return_value=PredictionResult(model_id=model_id, success=False),
-        ):
-            resp = client.post(url.format(model_id), json=applicant)
-            data = resp.get_json()
-            assert resp.status_code == 200
-            assert data["model_id"] == model_id
-            assert not data["success"]
+        with patch.object(ModelService, "get_model", return_value=model_metadata):
+            with patch.object(
+                ModelService,
+                "predict",
+                return_value=PredictionResult(model_id=model_id, success=False),
+            ):
+                resp = client.post(url.format(model_id), json=applicant)
+                data = resp.get_json()
+                assert resp.status_code == 200
+                assert data["model_id"] == model_id
+                assert not data["success"]
