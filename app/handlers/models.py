@@ -77,13 +77,6 @@ class Model(Resource):
             api.abort(404, "Model does not exist")
         return ModelService.get_model(model_id), 200
 
-<<<<<<< HEAD
-    @api.response(400, "Invalid input")
-    @api.response(404, "Model does not exist")
-    def delete(self, model_id: int) -> '':
-        '''Delete a model given its id'''
-        if model_id <= 0:
-=======
     @api.response(204, "Success")
     @api.response(400, "Invalid input")
     @api.response(404, "Model does not exist")
@@ -92,21 +85,14 @@ class Model(Resource):
         try:
             uuid.UUID(model_id, version=4)
         except ValueError:
->>>>>>> origin
             api.abort(400, "Invalid model ID")
         if not ModelService.get_model(model_id):
             api.abort(404, "Model does not exist")
         ModelService.delete(model_id)
-<<<<<<< HEAD
-        return '', 204
-
-@api.route("/<int:model_id>/predict")
-=======
         return "", 204
 
 
 @api.route("/<model_id>/predict")
->>>>>>> origin
 @api.param("model_id", description="The model ID")
 class ModelPrediction(Resource):
     @api.expect(applicant_model)
