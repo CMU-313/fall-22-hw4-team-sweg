@@ -1,3 +1,4 @@
+import os
 import pickle
 import uuid
 from dataclasses import asdict
@@ -7,7 +8,6 @@ from typing import List, Optional, Tuple
 
 import joblib
 import pandas as pd
-import os
 from sklearn.base import RegressorMixin
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.metrics import accuracy_score, r2_score
@@ -54,26 +54,27 @@ class ModelService:
         files = []
         model_ids = []
         filepath = data_dir.joinpath("models")
-        for file in os.listdir(filepath):
-            if file.endswith(".txt"):
-                files.append(os.path.join(filepath, file))
-                model_ids.append(file.replace(".txt", ""))
-        for i in range(len(files)):
+        for filename in os.listdir(filepath):
+            if filename.endswith(".txt"):
+                files.append(os.path.join(filepath, filename))
+                model_ids.append(filename[:-4])
+        for filename, model_id in zip(files, model_ids):
             # open txt file
-            f = open(files[i], "r")
-            data = f.readlines()
-            f.close()
-            
+            with open(filename, "r") as f:
+                data = f.readlines()
+
             model_list.append(
                 ModelMetadata(
-                model_id=model_ids[i],
-                model_class=data[0].split(":")[1],
-                score_func=data[1].split(":")[1],
-                num_features=int(data[2].split(":")[1]),
-                k=int(data[3].split(":")[1]),
-                train_acc=float(data[4].split(":")[1]),
-                valid_acc=float(data[5].split(":")[1])))
-        
+                    model_id=model_id,
+                    model_class=data[0].split(":")[1].strip(),
+                    score_func=data[1].split(":")[1].strip(),
+                    num_features=int(data[2].split(":")[1]),
+                    k=int(data[3].split(":")[1]),
+                    train_acc=float(data[4].split(":")[1]),
+                    valid_acc=float(data[5].split(":")[1]),
+                )
+            )
+
         return model_list
 
     @staticmethod
