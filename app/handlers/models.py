@@ -88,7 +88,8 @@ class Model(Resource):
             api.abort(400, "Invalid model ID")
         if not ModelService.get_model(model_id):
             api.abort(404, "Model does not exist")
-        ModelService.delete(model_id)
+        model_metadata = ModelService.get_model(model_id)
+        ModelService.delete(model_id, model_metadata)
         return "", 204
 
 

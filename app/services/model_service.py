@@ -150,11 +150,10 @@ class ModelService:
             joblib.dump(model, model_dir)
 
     @staticmethod
-    def delete(model_id: int) -> None:
+    def delete(model_id: int, model_metadata: ModelMetadata) -> None:
         # delete model and its related metadata
         try:
-            model_dir = data_dir.joinpath(f"models/{model_metadata.model_id}.txt")
-            shutil.rmtree(model_dir) # delete metadata files related to model
-            os.remove(f"models/{model_id}.pkl") # delete model
+            os.remove(f"models/{model_metadata.model_id}.txt") # delete model metadata
+            os.remove(f"models/{model_metadata.model_id}.pkl") # delete model
         except OSError as error:
             return None
