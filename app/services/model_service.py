@@ -1,3 +1,4 @@
+import os
 import pickle
 import uuid
 from dataclasses import asdict
@@ -49,7 +50,32 @@ class ModelService:
         # empty list so far, but should fetch the data from a
         # specific directory later, and parse out the data into
         # a list
-        return []
+        model_list = []
+        files = []
+        model_ids = []
+        filepath = data_dir.joinpath("models")
+        for filename in os.listdir(filepath):
+            if filename.endswith(".txt"):
+                files.append(os.path.join(filepath, filename))
+                model_ids.append(filename[:-4])
+        for filename, model_id in zip(files, model_ids):
+            # open txt file
+            with open(filename, "r") as f:
+                data = f.readlines()
+
+            model_list.append(
+                ModelMetadata(
+                    model_id=model_id,
+                    model_class=data[0].split(":")[1].strip(),
+                    score_func=data[1].split(":")[1].strip(),
+                    num_features=int(data[2].split(":")[1]),
+                    k=int(data[3].split(":")[1]),
+                    train_acc=float(data[4].split(":")[1]),
+                    valid_acc=float(data[5].split(":")[1]),
+                )
+            )
+
+        return model_list
 
     @staticmethod
     def delete(model_id: str) -> None:
