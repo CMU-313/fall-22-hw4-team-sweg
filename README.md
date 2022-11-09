@@ -133,7 +133,7 @@ Instead of using all the given features, we ranked them based on different score
 - classification – `chi2`, `f_classif`, `mutual_info_classif`
 
 and selected a subset of them to train a model.
-The lists of ranked features can be found in [`data/features`](https://github.com/CMU-313/fall-22-hw4-team-swag/tree/main/data/features).
+The lists of ranked features can be found in [`data/features`](https://github.com/CMU-313/fall-22-hw4-team-sweg/tree/main/data/features).
 
 We experimented to find an optimal combination of (model class, score function, number of features) that yields the best model. With 5-fold cross validation, the result is as follows:
 
@@ -141,4 +141,4 @@ We experimented to find an optimal combination of (model class, score function, 
 
 ![linear](./docs/linear.png)
 
-Our best model used a logistic regression with 12 features ranked by the `f_classif` function. The training accuracy was **83.54%**, and the validation accuracy was **83.29%**, much higher than the baseline model.
+Our best model used a logistic regression with 12 features ranked by the `f_classif` function (`mother_edu_4.0`, `failures`, `father_job_4.0`, `workday_alcohol`, `mother_edu_1.0`, `school_support_1.0`, `weekend_alcohol`, `age`, `mother_job_2.0`, `mother_edu_2.0`, `internet_1.0`, `absences`). The training accuracy was **83.54%**, and the validation accuracy was **83.29%**, much higher than the baseline model.
