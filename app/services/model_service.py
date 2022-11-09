@@ -1,5 +1,4 @@
 import os
-import pickle
 import uuid
 from dataclasses import asdict
 from pathlib import Path
@@ -47,25 +46,15 @@ class ModelService:
 
     @staticmethod
     def get_model_list() -> List[ModelMetadata]:
-        # empty list so far, but should fetch the data from a
-        # specific directory later, and parse out the data into
-        # a list
         model_list = []
-        files = []
-        model_ids = []
-        filepath = data_dir.joinpath("models")
-        for filename in os.listdir(filepath):
-            if filename.endswith(".txt"):
-                files.append(os.path.join(filepath, filename))
-                model_ids.append(filename[:-4])
-        for filename, model_id in zip(files, model_ids):
-            # open txt file
+        for filename in os.listdir(data_dir.joinpath("models")):
+            if not filename.endswith(".txt"):
+                continue
             with open(filename, "r") as f:
                 data = f.readlines()
-
             model_list.append(
                 ModelMetadata(
-                    model_id=model_id,
+                    model_id=filename[:-4],
                     model_class=data[0].split(":")[1].strip(),
                     score_func=data[1].split(":")[1].strip(),
                     num_features=int(data[2].split(":")[1]),
@@ -74,13 +63,16 @@ class ModelService:
                     valid_acc=float(data[5].split(":")[1]),
                 )
             )
-
         return model_list
 
     @staticmethod
     def delete(model_id: str) -> None:
-        # TODO (victor): Implement this function
-        return None
+        # Delete model and its related metadata
+        try:
+            os.remove(f"models/{model_id}.txt")  # Delete model metadata
+            os.remove(f"models/{model_id}.pkl")  # Delete model
+        except OSError:
+            return None
 
     @staticmethod
     def train(train_metadata: TrainMetadata) -> TrainResult:
