@@ -1,5 +1,4 @@
 import os
-import pickle
 import uuid
 from dataclasses import asdict
 from pathlib import Path
@@ -47,9 +46,6 @@ class ModelService:
 
     @staticmethod
     def get_model_list() -> List[ModelMetadata]:
-        # empty list so far, but should fetch the data from a
-        # specific directory later, and parse out the data into
-        # a list
         model_list = []
         files = []
         model_ids = []
@@ -62,7 +58,6 @@ class ModelService:
             # open txt file
             with open(filename, "r") as f:
                 data = f.readlines()
-
             model_list.append(
                 ModelMetadata(
                     model_id=model_id,
@@ -79,8 +74,12 @@ class ModelService:
 
     @staticmethod
     def delete(model_id: str) -> None:
-        # TODO (victor): Implement this function
-        return None
+        # Delete model and its related metadata
+        try:
+            os.remove(f"models/{model_id}.txt")  # delete model metadata
+            os.remove(f"models/{model_id}.pkl")  # delete model
+        except OSError:
+            return None
 
     @staticmethod
     def train(train_metadata: TrainMetadata) -> TrainResult:
@@ -180,12 +179,3 @@ class ModelService:
         model_dir = data_dir.joinpath(f"models/{model_id}.pkl")
         with open(model_dir, "w"):
             joblib.dump(model, model_dir)
-
-    @staticmethod
-    def delete(model_id: int, model_metadata: ModelMetadata) -> None:
-        # delete model and its related metadata
-        try:
-            os.remove(f"models/{model_metadata.model_id}.txt") # delete model metadata
-            os.remove(f"models/{model_metadata.model_id}.pkl") # delete model
-        except OSError as error:
-            return None
