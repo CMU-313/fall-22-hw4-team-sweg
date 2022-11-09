@@ -2,18 +2,6 @@ swagger: '2.0'
 basePath: /api
 paths:
   /models:
-    get:
-      responses:
-        '200':
-          description: Success
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/ModelMetadata'
-      summary: Gets a list of all the models
-      operationId: get_model_list
-      tags:
-        - models
     post:
       responses:
         '201':
@@ -29,7 +17,19 @@ paths:
           required: true
           in: body
           schema:
-            $ref: '#/definitions/ModelMetadata'
+            $ref: '#/definitions/TrainMetadata'
+      tags:
+        - models
+    get:
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ModelMetadata'
+      summary: Gets a list of all the models
+      operationId: get_model_list
       tags:
         - models
   /models/{model_id}:
@@ -38,7 +38,7 @@ paths:
         description: The model ID
         name: model_id
         required: true
-        type: integer
+        type: string
     delete:
       responses:
         '204':
@@ -71,7 +71,7 @@ paths:
         description: The model ID
         name: model_id
         required: true
-        type: integer
+        type: string
     post:
       responses:
         '200':
@@ -98,6 +98,7 @@ info:
   description: API endpoints for a microservice that predicts potential applicant success using machine learning.
   contact:
     name: Team SWEg (Eric Fan, Jihyo Chung, Kyungmin Kim, Leo Jung, Victor Waddell)
+    email: null
     url: https://github.com/CMU-313/fall-22-hw4-team-sweg
 produces:
   - application/json
@@ -107,10 +108,12 @@ tags:
   - name: models
     description: API endpoints to manage machine learning models
 definitions:
-  ModelMetadata:
+  TrainMetadata:
     required:
-      - learning_rate
+      - k
       - model_class
+      - num_features
+      - score_func
     properties:
       model_class:
         type: string
@@ -120,15 +123,28 @@ definitions:
         enum:
           - logistic
           - linear
-      learning_rate:
-        type: number
-        title: Predicted success
-        description: The success of the given applicant predicted by the model
+      score_func:
+        type: string
+        title: Score function
+        description: The score function to use to select features
+        example: f_regression
+        enum:
+          - f_regression
+          - mutual_info_regression
+          - f_classif
+          - mutual_info_classif
+          - chi2
+      num_features:
+        type: integer
+        title: Number of features
+        description: The number of features to select for training
+        minimum: 1
+        maximum: 51
       k:
         type: integer
         title: K-fold cross validation
         description: Value used in K-fold cross validation
-        minimum: 1
+        minimum: 2
     type: object
   TrainResult:
     required:
@@ -136,10 +152,9 @@ definitions:
       - train_acc
     properties:
       model_id:
-        type: integer
+        type: string
         title: Model ID
         description: The ID of the created model
-        minimum: 1
       train_acc:
         type: number
         title: Training accuracy
@@ -153,16 +168,111 @@ definitions:
         minimum: 0
         maximum: 1
     type: object
+  ModelMetadata:
+    required:
+      - k
+      - model_class
+      - model_id
+      - num_features
+      - score_func
+      - train_acc
+    properties:
+      model_id:
+        type: string
+        title: Model ID
+        description: The ID of the created model
+      train_acc:
+        type: number
+        title: Training accuracy
+        description: Model accuracy tested on training set
+        minimum: 0
+        maximum: 1
+      valid_acc:
+        type: number
+        title: Validation accuracy
+        description: Model accuracy tested on validation set
+        minimum: 0
+        maximum: 1
+      model_class:
+        type: string
+        title: Model class
+        description: The name of the model class
+        example: logistic
+        enum:
+          - logistic
+          - linear
+      score_func:
+        type: string
+        title: Score function
+        description: The score function to use to select features
+        example: f_regression
+        enum:
+          - f_regression
+          - mutual_info_regression
+          - f_classif
+          - mutual_info_classif
+          - chi2
+      num_features:
+        type: integer
+        title: Number of features
+        description: The number of features to select for training
+        minimum: 1
+        maximum: 51
+      k:
+        type: integer
+        title: K-fold cross validation
+        description: Value used in K-fold cross validation
+        minimum: 2
+    type: object
   Applicant:
+    required:
+      - absences
+      - activities
+      - address
+      - age
+      - failures
+      - family_rel
+      - family_size
+      - family_support
+      - father_edu
+      - father_job
+      - free_time
+      - going_out
+      - guardian
+      - health
+      - higher
+      - internet
+      - mother_edu
+      - mother_job
+      - nursery
+      - p_status
+      - paid
+      - reason
+      - romantic
+      - school
+      - school_support
+      - sex
+      - study_time
+      - travel_time
+      - weekend_alcohol
+      - workday_alcohol
     properties:
       school:
-        type: boolean
+        type: string
         title: School
-        description: Student's school (true - Gabriel Pereira, false - Mousinho da Silveira)
+        description: Student's school (GP - Gabriel Pereira, MS - Mousinho da Silveira)
+        example: GP
+        enum:
+          - GP
+          - MS
       sex:
-        type: boolean
+        type: string
         title: Sex
-        description: Student's sex (true - female, false - male)
+        description: Student's sex (F - female, M - male)
+        example: F
+        enum:
+          - F
+          - M
       age:
         type: integer
         title: Age
@@ -170,17 +280,29 @@ definitions:
         minimum: 15
         maximum: 22
       address:
-        type: boolean
+        type: string
         title: Address
-        description: Student's home address type (true - urban, false - rural)
+        description: Student's home address type (U - urban, R - rural)
+        example: U
+        enum:
+          - U
+          - R
       family_size:
-        type: boolean
+        type: string
         title: Family size
-        description: Family size (true - <=3, false - >3)
+        description: Family size (LE3 - <=3, GT3 - >3)
+        example: LE3
+        enum:
+          - LE3
+          - GT3
       p_status:
-        type: boolean
+        type: string
         title: P status
-        description: Parent's cohabitation status (true - living together, false - apart)
+        description: Parent's cohabitation status (T - living together, A - apart)
+        example: T
+        enum:
+          - T
+          - A
       mother_edu:
         type: integer
         title: Mother's education
@@ -194,41 +316,58 @@ definitions:
         minimum: 0
         maximum: 4
       mother_job:
-        type: integer
+        type: string
         title: Mother's job
-        description: Mother's job (0 - teacher, 1 - health-related, 2 - civil services, 3 - at home, 4 - other)
-        minimum: 0
-        maximum: 4
+        description: Mother's job (teacher, health care related, civil services (e.g. administrative or police), at_home or other)
+        example: teacher
+        enum:
+          - teacher
+          - health
+          - services
+          - at home
+          - other
       father_job:
-        type: integer
+        type: string
         title: Father's job
-        description: Father's job (0 - teacher, 1 - health-related, 2 - civil services, 3 - at home, 4 - other)
-        minimum: 0
-        maximum: 4
+        description: Father's job (teacher, health care related, civil services (e.g. administrative or police), at_home or other)
+        example: teacher
+        enum:
+          - teacher
+          - health
+          - services
+          - at home
+          - other
       reason:
-        type: integer
+        type: string
         title: Reason
-        description: Reason to choose this school (0 - close to home, 1 - school reputation, 2 - course preference, 3 - other)
-        minimum: 0
-        maximum: 3
+        description: Reason to choose this school (close to home, school reputation, course preference or other)
+        example: home
+        enum:
+          - home
+          - reputation
+          - course
+          - other
       guardian:
-        type: integer
+        type: string
         title: Guardian
-        description: Student's guardian (0 - mother, 1 - father, 2 - other)
-        minimum: 0
-        maximum: 2
+        description: Student's guardian (mother, father, or other)
+        example: mother
+        enum:
+          - mother
+          - father
+          - other
       travel_time:
         type: integer
         title: Travel time
-        description: Home to school travel time (0 - <15 min, 1 - 15~30 min, 2 - 30~60 min, 3 - >60 min)
-        minimum: 0
-        maximum: 3
+        description: Home to school travel time (1 - <15 min, 2 - 15~30 min, 3 - 30~60 min, 4 - >60 min)
+        minimum: 1
+        maximum: 4
       study_time:
         type: integer
         title: Study time
-        description: Weekly study time (0 - <2 hrs, 1 - 2~5 hrs, 2 - 5~10 hrs, 3 - >10 hrs)
-        minimum: 0
-        maximum: 3
+        description: Weekly study time (1 - <2 hrs, 2 - 2~5 hrs, 3 - 5~10 hrs, 4 - >10 hrs)
+        minimum: 1
+        maximum: 4
       failures:
         type: integer
         title: Failures
@@ -236,37 +375,69 @@ definitions:
         minimum: 1
         maximum: 4
       school_support:
-        type: boolean
+        type: string
         title: School support
-        description: Extra educational support (true - yes, false - no)
+        description: Extra educational support (yes or no)
+        example: 'yes'
+        enum:
+          - 'yes'
+          - 'no'
       family_support:
-        type: boolean
+        type: string
         title: Family support
-        description: Family educational support (true - yes, false - no)
+        description: Family educational support (yes or no)
+        example: 'yes'
+        enum:
+          - 'yes'
+          - 'no'
       paid:
-        type: boolean
+        type: string
         title: Paid
-        description: Extra paid classes within the course subject (true - yes, false - no)
+        description: Extra paid classes within the course subject (yes or no)
+        example: 'yes'
+        enum:
+          - 'yes'
+          - 'no'
       activities:
-        type: boolean
+        type: string
         title: Activities
-        description: Participated in extra-curricular activities (true - yes, false - no)
+        description: Participated in extra-curricular activities (yes or no)
+        example: 'yes'
+        enum:
+          - 'yes'
+          - 'no'
       nursery:
-        type: boolean
+        type: string
         title: Nursery
-        description: Attended nursery school (true - yes, false - no)
+        description: Attended nursery school (yes or no)
+        example: 'yes'
+        enum:
+          - 'yes'
+          - 'no'
       higher:
-        type: boolean
+        type: string
         title: Higher
-        description: Wants to take higher education (true - yes, false - no)
-      Internet:
-        type: boolean
+        description: Wants to take higher education (yes or no)
+        example: 'yes'
+        enum:
+          - 'yes'
+          - 'no'
+      internet:
+        type: string
         title: Internet
-        description: Internet access at home (true - yes, false - no)
-      Romantic:
-        type: boolean
+        description: Internet access at home (yes or no)
+        example: 'yes'
+        enum:
+          - 'yes'
+          - 'no'
+      romantic:
+        type: string
         title: Romantic
-        description: With a romantic relationship (true - yes, false - no)
+        description: With a romantic relationship (yes or no)
+        example: 'yes'
+        enum:
+          - 'yes'
+          - 'no'
       family_rel:
         type: integer
         title: Family relationship
@@ -316,10 +487,9 @@ definitions:
       - success
     properties:
       model_id:
-        type: integer
+        type: string
         title: Model ID
         description: The ID of the model used to make prediction
-        minimum: 1
       success:
         type: boolean
         title: Predicted success
